@@ -1,0 +1,132 @@
+{
+  "version": "1.4",
+  "version_code": 5,
+  "checked_at_utc": "2026-10-30T17:15:40.973078+00:00",
+  "device": "Xiaomi Pad 5 Pro",
+  "install": "已沿用原签名，通过 adb install -r 升级安装；未清空应用数据",
+  "design": "原生 Canvas 暖米色仪表盘；大宋体时钟、实时设备日期、植物阴影、双列卡片、底部星形搜索按钮；适配横竖屏",
+  "data_boundaries": {
+    "temperature_humidity": "未接入，显示占位",
+    "weather": "未接入，显示占位",
+    "whole_home_lights": "未接入，开关不执行命令",
+    "plug": "沿用真实 HA 状态与原控制逻辑",
+    "clock": "读取平板系统时间和时区，不改系统时间"
+  },
+  "ui_checks": {
+    "landscape_search_hit_target": "[1137,1257][1423,1494]",
+    "landscape_clock_before": "10月31日 星期六 上午1:14",
+    "plug_accessibility_checked": true,
+    "read_only_refresh_on": true,
+    "pinyin_search": true,
+    "back_resets_search": true,
+    "initials_search_and_launch": true,
+    "home_returns_dashboard": true,
+    "long_press_settings_menu": true,
+    "portrait_search_hit_target": "[653,2084][948,2379]",
+    "portrait_search": true,
+    "power_commands_sent": false,
+    "rotation_settings_restored": {
+      "accelerometer_rotation": "1",
+      "user_rotation": "0"
+    }
+  },
+  "service_read_before": {
+    "checked_at_utc": "2026-10-30T17:07:57.735214+00:00",
+    "target": "tablet localhost:8123",
+    "version": "2026.10.4",
+    "server_state": "RUNNING",
+    "xiaomi_home_loaded": true,
+    "plug_state": "on",
+    "last_changed": "2026-10-30T16:22:22.969558+00:00",
+    "last_updated": "2026-10-30T16:22:22.969558+00:00",
+    "adb_reverse_empty": true,
+    "requests": "GET only"
+  },
+  "service_read_after": {
+    "checked_at_utc": "2026-10-30T17:14:29.446853+00:00",
+    "target": "tablet localhost:8123",
+    "version": "2026.10.4",
+    "server_state": "RUNNING",
+    "xiaomi_home_loaded": true,
+    "plug_state": "on",
+    "last_changed": "2026-10-30T16:22:22.969558+00:00",
+    "last_updated": "2026-10-30T16:22:22.969558+00:00",
+    "adb_reverse_empty": true,
+    "requests": "GET only"
+  },
+  "same_reported_power_state": true,
+  "same_last_changed": true,
+  "default_home_retained": "com.alex.minimalhome/.MainActivity",
+  "adb_forwards_at_end": [],
+  "adb_reverses_at_end": [],
+  "scope": [
+    "未发送 turn_on、turn_off 或 toggle，也未点击真实开关",
+    "未主动断 Wi-Fi、重启平板或停止 Termux",
+    "未收集、重置或延长24小时soak运行",
+    "这次检查不证明真实插座通断或长期运行稳定性",
+    "未在新版重新测试 Wi-Fi 丢失/恢复及重启，已有旧版证据另存"
+  ],
+  "artifacts": {
+    "landscape": "暖色桌面横屏预览.png",
+    "portrait": "暖色桌面竖屏预览.png",
+    "apk": "极简搜索桌面.apk",
+    "source": "极简搜索桌面源码.zip"
+  },
+  "build": {
+    "apk": "outputs/极简搜索桌面.apk",
+    "bytes": 49636,
+    "sha256": "1580edcb65cb3ef50a04c16c545d1b4483cacecfb27edac8d1009843a478ddfa",
+    "sources": {
+      "app/src/com/alex/minimalhome/HomeControls.java": "df35e3edf7207d69c51ac8d664f72dbc468971933f833698c3a0da54f31e0c0d",
+      "app/src/com/alex/minimalhome/MainActivity.java": "e5404309e8e8a5c2963fe65bdd65b5ed45264d4156a1e490716a5e322d9637c0",
+      "app/src/com/alex/minimalhome/WarmDashboard.java": "4d9e1e3a15ff8aac905671fda8c56e3ff9128a4c3dd5e682db7cc4d7f628d95d"
+    },
+    "signature_verified": true,
+    "permissions": [
+      "uses-permission: name='android.permission.INTERNET'",
+      "uses-permission: name='android.permission.ACCESS_NETWORK_STATE'",
+      "uses-permission: name='com.termux.permission.RUN_COMMAND'"
+    ]
+  },
+  "clock_observation": {
+    "before": "10月31日 星期六 上午1:14",
+    "after": "10月31日 星期六 上午1:15",
+    "advanced": true
+  },
+  "record_scope": {
+    "version": "1.4",
+    "historical_record": true,
+    "meaning": "只对应本记录 checked_at_utc 时段及 build 中的历史源码摘要；不代表 1.7、后续工作区或当前平板安装状态。",
+    "device_validation_repeated_for_publication": false
+  },
+  "artifact_scope": {
+    "screenshots": "本记录列出的横竖屏图片为历史实机截图；通过 screenshot_sha256 绑定。",
+    "apk_and_source_names": "artifacts 中的 APK 和源码包名称是当时输出槽位，同名文件已可能被后续构建覆盖；历史 build 摘要不能套用于当前同名文件。",
+    "apk_and_source_uploaded": false,
+    "build_hashes_are_historical": true
+  },
+  "screenshot_sha256": {
+    "暖色桌面横屏预览.png": "efe541225764fb7a8e6866d82aa53c28d864a2c00a2a7c1504b31a21ea199867",
+    "暖色桌面竖屏预览.png": "0c1929e9935d7e7b7a0e29923ffc64f520a1b035db151b06603e7a6710a5bd21"
+  },
+  "physical_power_measurement": false,
+  "long_term_verification_complete": false,
+  "publication_review": {
+    "checked_at_utc": "2026-10-30T17:46:27.091755+00:00",
+    "method": "仅复核现有本地文件；未访问平板、ADB 或 Home Assistant，未重新执行实机检查。",
+    "historical_build_log": "work/minimal-launcher/qa/warm-ui/build.log",
+    "historical_qa_directory": "work/minimal-launcher/qa/warm-ui/",
+    "checks": [
+      "历史 build 日志中的 APK 大小、SHA256、源码摘要、签名及权限结果与本记录一致；apk 路径改为项目相对路径。",
+      "本地 QA 的 UI 检查、服务读取记录与对应字段一致。",
+      "两张截图与本地 QA final PNG 字节一致，并保存 SHA256。"
+    ],
+    "device_operations": false,
+    "soak_records_collected_or_modified": false,
+    "limits": [
+      "复核保存的历史证据，不独立重测当前设备行为。",
+      "HA 状态报告不能代替实际功率测量或证明两次读取之间持续供电。",
+      "历史截图和检查不适用于 1.7；长期采样最终结论仍待回收日志。"
+    ]
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "version": "2.1.2",
+  "version_code": 15,
+  "recorded_at_utc": "2026-10-31T05:40:13.462506+00:00",
+  "change": "Clarifies available home actions and new-conversation control limits. Existing Codex-to-Native-to-local-HA power implementation is unchanged; no new device imported.",
+  "capabilities": {
+    "power_control": [
+      "oven plug: fixed on or off"
+    ],
+    "query": [
+      "oven plug status",
+      "indoor temperature and humidity",
+      "outdoor weather"
+    ],
+    "other_devices_connected_for_voice_control": false,
+    "confirmation": "No second confirmation for an accepted explicit voice command. Touch still confirms.",
+    "limitation": "Start a new voice conversation and speak one explicit control instruction after connection. Query-then-control, multiple operations, negative or ambiguous speech is rejected by the existing evidence guard."
+  },
+  "build": {
+    "apk_sha256": "c9aa120c6612f6cbd3575ae6358a668b30a6f7428dbee490e7123f17b900547f",
+    "bytes": 14775689,
+    "manifest_sha256": "228dfec68b48c9752780cdc2ce2cd2f87bf348cd41ce45ae32fbae91fc2f7d30",
+    "voice_page_sha256": "c2ad9f6e0582a3fed0189083527c637df23ce6026619fbd8f843c5d29f6d687e",
+    "signature_verified": true,
+    "all_java_sources_unchanged_from_previous_commit": true,
+    "installed_apk_matches_build": true
+  },
+  "deployment_readback": {
+    "server_control_enabled": true,
+    "installed": true,
+    "native_control_enabled_read_back": true,
+    "version": "2.1.2",
+    "version_code": 15,
+    "installed_apk_matches_build": true,
+    "sha256": "c9aa120c6612f6cbd3575ae6358a668b30a6f7428dbee490e7123f17b900547f",
+    "power_commands_sent": false,
+    "voice_session_opened": false,
+    "settings_changed": false,
+    "cloud_sessions_unchanged": true,
+    "returned_home": true
+  },
+  "checks": {
+    "native_host_guard_checks": 49,
+    "speech_evidence_boundary_checks": 28,
+    "page_cases": 33,
+    "page_assertions": 249,
+    "passed": true,
+    "scope": "Host simulations; no real device write or cloud conversation. Normal control capability confirmed by source audit and both permissions read back, not real power switching."
+  },
+  "read_only_inventory": {
+    "source": "Tablet-local HA GET /api/states",
+    "voice_power_target_count": 1,
+    "auxiliary_switch_entities_excluded": true,
+    "lights_climate_cover_not_connected": true
+  },
+  "observation": {
+    "started_at_utc": "2026-10-31T05:37:55.223557+00:00",
+    "finished_at_utc": "2026-10-31T05:38:37.205128+00:00",
+    "plug_before": {
+      "state": "on",
+      "last_changed": "2026-10-30T17:22:57.173501+00:00",
+      "last_updated": "2026-10-30T17:22:57.173501+00:00"
+    },
+    "plug_after": {
+      "state": "on",
+      "last_changed": "2026-10-30T17:22:57.173501+00:00",
+      "last_updated": "2026-10-30T17:22:57.173501+00:00"
+    },
+    "process_identity_unchanged": true,
+    "plug_state_unchanged": true,
+    "plug_last_changed_unchanged": true,
+    "service_events": [],
+    "observer_errors": [],
+    "forwards_after_empty": true,
+    "reverses_after_empty": true
+  },
+  "soak": {
+    "reset_extended_collected_or_modified": false,
+    "deadline_utc": "2026-10-31T16:35:24Z",
+    "long_term_verdict": "Pending original completion and safe log review",
+    "workload": "Launcher upgrade and read-only settings inspection; keep this observation interval in the final soak timeline"
+  },
+  "not_verified": [
+    "Real voice-triggered power switching remains intentionally untested.",
+    "No new device, scene, automation or continuous multi-command voice control added."
+  ]
+}

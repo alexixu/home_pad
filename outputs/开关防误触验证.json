@@ -1,0 +1,124 @@
+{
+  "checked_at_utc": "2026-10-30T17:39:48.715761+00:00",
+  "version": "1.6",
+  "version_code": 7,
+  "installed": true,
+  "behavior": "首页只展示电源状态，整张卡片点击后打开固定目标的确认框，明确确认才执行；取消、返回、HOME不切换",
+  "checks": {
+    "service_event_observer_started": true,
+    "home_has_status_card_and_no_switch": true,
+    "old_switch_area_opens_confirmation_only": true,
+    "cancel_keeps_on": true,
+    "back_cancels": true,
+    "home_key_cancels": true,
+    "normal_poll_keeps_same_confirmed_action": true,
+    "observed_switch_light_service_calls": [],
+    "confirmation_button_clicked": false,
+    "rotation_restored": {
+      "accelerometer_rotation": "1",
+      "user_rotation": "0"
+    }
+  },
+  "service_before": {
+    "checked_at_utc": "2026-10-30T17:34:26.931794+00:00",
+    "target": "tablet localhost:8123",
+    "version": "2026.10.4",
+    "server_state": "RUNNING",
+    "xiaomi_home_loaded": true,
+    "plug_state": "on",
+    "last_changed": "2026-10-30T17:22:57.173501+00:00",
+    "last_updated": "2026-10-30T17:22:57.173501+00:00",
+    "adb_reverse_empty": true,
+    "requests": "GET only"
+  },
+  "service_after": {
+    "checked_at_utc": "2026-10-30T17:39:48.668861+00:00",
+    "target": "tablet localhost:8123",
+    "version": "2026.10.4",
+    "server_state": "RUNNING",
+    "xiaomi_home_loaded": true,
+    "plug_state": "on",
+    "last_changed": "2026-10-30T17:22:57.173501+00:00",
+    "last_updated": "2026-10-30T17:22:57.173501+00:00",
+    "adb_reverse_empty": true,
+    "requests": "GET only"
+  },
+  "same_reported_state": true,
+  "same_last_changed": true,
+  "code_review": [
+    "唯一非空beginRequest调用位于确认按钮回调",
+    "确认目标在弹框时固定",
+    "确认前复核活动状态、网络、配置身份和报告的电源状态",
+    "正常轮询期间暂禁确认，状态或配置变化使原确认失效"
+  ],
+  "scope": [
+    "没有点击确认按钮，真实通断仍未验证",
+    "没有修改HA配置或服务，未主动断Wi-Fi、重启设备或服务",
+    "未回收、重置或延长soak运行",
+    "事件监听仅记录测试窗口内的switch/light服务调用；本次观察为0",
+    "使用原签名升级，保留温湿度天气绑定和加密授权"
+  ],
+  "build": {
+    "apk": "outputs/极简搜索桌面.apk",
+    "bytes": 61924,
+    "sha256": "dc3143112231833ce134f7944be12943dca51f8fa0f4fc2710b3d9e4b86cd9ed",
+    "sources": {
+      "app/src/com/alex/minimalhome/EnvironmentControls.java": "bb98cb769982e190f3d367ae9812746bc61f994142b296910bfa5ced182dc52b",
+      "app/src/com/alex/minimalhome/HomeControls.java": "32b927d27825230b8a5ee60696a0a39925910064cec781637ec75053aa2f0a4c",
+      "app/src/com/alex/minimalhome/MainActivity.java": "a69356f9db6c18bc68e1afa8cf07b1ddf3ffbb8f289a1f60dd34a611e0c3f688",
+      "app/src/com/alex/minimalhome/WarmDashboard.java": "7bf2b8abf234e728966e4fa82b37f2dd994bbe2f99520aba4ad4ad63ec59cfe3"
+    },
+    "signature_verified": true,
+    "permissions": [
+      "uses-permission: name='android.permission.INTERNET'",
+      "uses-permission: name='android.permission.ACCESS_NETWORK_STATE'",
+      "uses-permission: name='com.termux.permission.RUN_COMMAND'"
+    ]
+  },
+  "artifacts": {
+    "home": "开关状态首页预览.png",
+    "confirmation": "开关操作确认预览.png",
+    "apk": "极简搜索桌面.apk",
+    "source": "极简搜索桌面源码.zip"
+  },
+  "record_scope": {
+    "version": "1.6",
+    "version_code": 7,
+    "historical_record": true,
+    "meaning": "只对应 checked_at_utc 时段与 build 中记录的历史构建，不代表 1.6.1、1.7、后续工作区或当前平板安装状态。",
+    "historical_home_interaction": "1.6 的卡面没有开关，但整张卡片仍可点击打开确认框；此旧版交互不适用于 1.7 的不可点击首页。",
+    "device_validation_repeated_for_publication": false
+  },
+  "artifact_scope": {
+    "screenshots": "两张图片为本记录对应的 1.6 历史实机截图，通过 screenshot_sha256 绑定，不作 1.7 预览。",
+    "apk_and_source_names": "APK 和源码包名称是当时的输出槽位，同名本地文件已可能被后续构建覆盖；不能将历史 build 摘要用于当前同名文件。",
+    "apk_and_source_uploaded": false,
+    "build_hashes_are_historical": true
+  },
+  "screenshot_sha256": {
+    "开关状态首页预览.png": "95b18ef795025817fc1ad626e13b4eb74fafab5ae918080d05a2dab0158e921e",
+    "开关操作确认预览.png": "69add26ecea68e0ef5333369875c9120985350391eac61ea87f71d9907c66b5a"
+  },
+  "physical_power_measurement": false,
+  "long_term_verification_complete": false,
+  "publication_review": {
+    "checked_at_utc": "2026-10-30T17:48:54.244157+00:00",
+    "method": "只复核现有本地历史文件；未访问平板、ADB 或 Home Assistant，未运行验证脚本或重新执行设备检查。",
+    "historical_qa_directory": "work/minimal-launcher/qa/confirmation/",
+    "checks": [
+      "build.log 中的 APK 大小、SHA256、源码摘要、签名及权限结果与本记录一致；apk 路径改为项目相对路径。",
+      "verification.json、service-before.json、service-after.json 与本记录相应字段一致。",
+      "home/confirmation/cancelled/back/home-key/poll-before/poll-after XML 支持当时首页无开关、弹框、取消和返回，以及轮询前后相同确认目标的记录。",
+      "两张输出截图与 QA home.png、confirmation.png 字节一致，并保存 SHA256。"
+    ],
+    "device_operations": false,
+    "soak_records_collected_or_modified": false,
+    "limits": [
+      "observed_switch_light_service_calls 仅为历史测试窗口内 switch/light 服务事件观察，不能推断窗口外情况或所有设备控制路径。",
+      "确认按钮未点击，实际开启或关闭行为未验证。",
+      "cancel_keeps_on 和前后状态一致表示 UI/HA 的 on 报告，不能证明实际功率或两次读取之间持续供电。",
+      "code_review 保留当时的审查记录；此次没有使用当前 1.7 源码冒充历史 1.6 源码重新验证。",
+      "本记录和截图不覆盖 1.6.1 或 1.7，也不构成长时间运行、物理拔线时长或电池续航验证。"
+    ]
+  }
+}

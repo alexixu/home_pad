@@ -1,0 +1,191 @@
+{
+  "checked_at_utc": "2026-10-30T17:31:05.416444+00:00",
+  "version": "1.5",
+  "version_code": 6,
+  "discovery": {
+    "xiaomi_authorized_devices": 19,
+    "ha_previously_imported_devices": 1,
+    "existing_temperature_humidity_source": "客厅温湿度计",
+    "existing_weather_entity": false,
+    "disabled_entities_checked": true
+  },
+  "sensor_import": {
+    "added": "客厅温湿度计",
+    "model": "miaomiaoce.sensor_ht.t2",
+    "devices_added": 1,
+    "devices_removed": 0,
+    "existing_plug_retained": true,
+    "saved_at_utc": "2026-10-30T17:22:41.901106+00:00",
+    "integration_reload_scheduled": true,
+    "ha_restarted": false,
+    "device_service_calls": 0,
+    "soak_reset_or_extended": false
+  },
+  "weather_setup": {
+    "provider": "Meteorologisk institutt (Met.no)",
+    "name": "杭州市拱墅区",
+    "latitude": 30.32,
+    "longitude": 120.14,
+    "elevation_m": 13,
+    "location_precision": "district representative point; not home address",
+    "coordinate_reference": "https://ditu.amap.com/place/B023B09DM4",
+    "elevation_reference": "https://api.open-meteo.com/v1/elevation?latitude=30.32&longitude=120.14",
+    "provider_reference": "https://www.home-assistant.io/integrations/met/",
+    "global_ha_location_changed": false,
+    "created_at_utc": "2026-10-30T17:22:55.781657+00:00",
+    "config_created": true,
+    "readings_verified": true
+  },
+  "readings": {
+    "temperature": {
+      "name": "客厅温湿度计 温度",
+      "state": "25.6",
+      "unit": "°C",
+      "temperature": null,
+      "temperature_unit": null,
+      "last_updated": "2026-10-30T17:24:01.127133+00:00",
+      "last_reported": "2026-10-30T17:24:01.127133+00:00"
+    },
+    "humidity": {
+      "name": "客厅温湿度计 湿度",
+      "state": "72.6",
+      "unit": "%",
+      "temperature": null,
+      "temperature_unit": null,
+      "last_updated": "2026-10-30T17:24:01.131778+00:00",
+      "last_reported": "2026-10-30T17:24:01.131778+00:00"
+    },
+    "weather": {
+      "name": "杭州市拱墅区",
+      "state": "clear-night",
+      "unit": null,
+      "temperature": 15.2,
+      "temperature_unit": "°C",
+      "last_updated": "2026-10-30T17:24:01.135933+00:00",
+      "last_reported": "2026-10-30T17:24:01.135933+00:00"
+    }
+  },
+  "ui_checks": {
+    "upgrade_kept_bindings_and_ha_authorization": true,
+    "missing_temperature_does_not_fake_value_or_hide_humidity_weather": true,
+    "correct_sources_restored": true,
+    "card_tap_read_only_refresh": true,
+    "full_source_and_timestamp_details": true,
+    "landscape_live_data": true,
+    "portrait_live_data": true,
+    "search_and_back_preserved": true,
+    "final_display": {
+      "室内温度": "室内温度，25.6 摄氏度，湿度 72.6%，来源：客厅温湿度计，已连接，数据记录时间：10-31 01:24",
+      "室外天气": "室外天气，15.2 摄氏度，晴朗夜晚，来源：杭州市拱墅区，Weather forecast from met.no, delivered by the Norwegian Meteorological Institute.，已连接，数据记录时间：10-31 01:24"
+    },
+    "rotation_restored": {
+      "accelerometer_rotation": "1",
+      "user_rotation": "0"
+    },
+    "plug_power_actions": 0,
+    "ha_device_service_calls": 0,
+    "landscape_screenshot_pixels": [
+      2560,
+      1600
+    ],
+    "portrait_screenshot_pixels": [
+      1600,
+      2560
+    ]
+  },
+  "service_after": {
+    "checked_at_utc": "2026-10-30T17:29:28.419049+00:00",
+    "target": "tablet localhost:8123",
+    "version": "2026.10.4",
+    "server_state": "RUNNING",
+    "xiaomi_home_loaded": true,
+    "plug_state": "on",
+    "last_changed": "2026-10-30T17:22:57.173501+00:00",
+    "last_updated": "2026-10-30T17:22:57.173501+00:00",
+    "adb_reverse_empty": true,
+    "requests": "GET only"
+  },
+  "build": {
+    "apk": "outputs/极简搜索桌面.apk",
+    "bytes": 57828,
+    "sha256": "8a3fc22623c4acbc94e31d93b1c7cb4e0a467fc751e6a167d8df14dcd4f3974c",
+    "sources": {
+      "app/src/com/alex/minimalhome/EnvironmentControls.java": "bb98cb769982e190f3d367ae9812746bc61f994142b296910bfa5ced182dc52b",
+      "app/src/com/alex/minimalhome/HomeControls.java": "521675dabfd43880d896641838b871626fd059b6f62954f1a7fe27a74e6471e9",
+      "app/src/com/alex/minimalhome/MainActivity.java": "6643f7ebff7e1d1f9bb686e6b3af8fc76599099fa5be11946be49627ece21708",
+      "app/src/com/alex/minimalhome/WarmDashboard.java": "01e4bebf048e41536cf846d140cce6c95683a1aed8ce6f6ff08413c2099ad981"
+    },
+    "signature_verified": true,
+    "permissions": [
+      "uses-permission: name='android.permission.INTERNET'",
+      "uses-permission: name='android.permission.ACCESS_NETWORK_STATE'",
+      "uses-permission: name='com.termux.permission.RUN_COMMAND'"
+    ]
+  },
+  "polling": {
+    "foreground_seconds": 60,
+    "scope": "GET configured temperature/humidity/weather states only",
+    "weather_provider_refresh": "managed by Home Assistant MET integration",
+    "physical_sensor_sampling_time_verified": false
+  },
+  "boundaries": [
+    "仅新增客厅温湿度计，保留原插座；未导入其余米家设备",
+    "本次操作包含一次小米集成重载，未重启HA进程或平板",
+    "集成重载后 HA 实体记录时间发生变化，不能据此推断插座物理切换",
+    "未发送turn_on/turn_off/toggle或其他设备控制服务",
+    "测试来源不存在只更改桌面的环境实体绑定，已恢复真实来源",
+    "未更改HA全局位置；天气为拱墅区代表点，不是家庭精确位置或现场温度传感器",
+    "未主动断Wi-Fi，不重复旧版断网与重启测试",
+    "未回收、重置或延长24小时soak；最终统计须标注本次主动配置变更",
+    "温湿度来自HA缓存报告，记录时间不证明物理采样时刻",
+    "全屋灯光仍未接入",
+    "最终 soak 汇总保留全部失败样本和缺口，按时间关联本次主动集成重载；不剔除或算作成功，不宣称完整无人干预运行。"
+  ],
+  "adb_forwards_at_end": [],
+  "adb_reverses_at_end": [],
+  "artifacts": {
+    "landscape": "环境数据桌面横屏预览.png",
+    "portrait": "环境数据桌面竖屏预览.png",
+    "apk": "极简搜索桌面.apk",
+    "source": "极简搜索桌面源码.zip"
+  },
+  "record_scope": {
+    "version": "1.5",
+    "historical_record": true,
+    "meaning": "只对应本记录 checked_at_utc 时段及 build 中的历史源码摘要；不代表 1.7、后续工作区或当前平板安装状态。",
+    "device_validation_repeated_for_publication": false
+  },
+  "artifact_scope": {
+    "screenshots": "本记录列出的横竖屏图片为历史实机截图；通过 screenshot_sha256 绑定。",
+    "apk_and_source_names": "artifacts 中的 APK 和源码包名称是当时输出槽位，同名文件已可能被后续构建覆盖；历史 build 摘要不能套用于当前同名文件。",
+    "apk_and_source_uploaded": false,
+    "build_hashes_are_historical": true
+  },
+  "screenshot_sha256": {
+    "环境数据桌面横屏预览.png": "c9f45a93d6f9b8cc5f45fab86159bc752ff4f926e14465324bf66e8a3d3faccf",
+    "环境数据桌面竖屏预览.png": "04e326bc1084a133e1c770771e85bac827a8cb69e5d2643ba06dfeceafbfa690"
+  },
+  "physical_power_measurement": false,
+  "long_term_verification_complete": false,
+  "publication_review": {
+    "checked_at_utc": "2026-10-30T17:46:27.091755+00:00",
+    "method": "仅复核现有本地文件；未访问平板、ADB 或 Home Assistant，未重新执行实机检查。",
+    "historical_build_log": "work/minimal-launcher/qa/environment/build.log",
+    "historical_qa_directory": "work/minimal-launcher/qa/environment/",
+    "checks": [
+      "历史 build 日志中的 APK 大小、SHA256、源码摘要、签名及权限结果与本记录一致；apk 路径改为项目相对路径。",
+      "本地 QA 的 UI 检查、服务读取记录与对应字段一致。",
+      "两张截图与本地 QA final PNG 字节一致，并保存 SHA256。",
+      "四个 Java 源码 SHA256 与 source_commit 对应文件一致。"
+    ],
+    "device_operations": false,
+    "soak_records_collected_or_modified": false,
+    "limits": [
+      "复核保存的历史证据，不独立重测当前设备行为。",
+      "HA 状态报告不能代替实际功率测量或证明两次读取之间持续供电。",
+      "历史截图和检查不适用于 1.7；长期采样最终结论仍待回收日志。",
+      "readings 为后续 17:24 读取记录；早期 first-readings.json 的读数时间为 17:22–23，不是同一次快照。后续 UI 转储支持所列数值及 01:24 显示时间。"
+    ]
+  },
+  "source_commit": "c6a0b57eea1c5b6ae245e5556f514aa928e7e01b"
+}

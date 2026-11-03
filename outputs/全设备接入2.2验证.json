@@ -1,0 +1,200 @@
+{
+  "recorded_at_utc": "2026-10-31T15:45:09.662216+00:00",
+  "status": "2.2 installed; existing two-device catalog verified; all-device import deferred until original soak ends and final logs are preserved",
+  "version": "2.2",
+  "version_code": 16,
+  "apk_sha256": "043f5cd267b0f0053115954349e883c65567de162a259bf2f9cdf16173901b4b",
+  "apk_bytes": 14804361,
+  "original_signing_key_preserved": true,
+  "installed_apk_matches_build": true,
+  "sources": {
+    "app/src/com/alex/minimalhome/ControlCenter.java": "8071021e89ae03838f53a85472fb7983385f0012204ec8a28e81db5f4e3f88da",
+    "app/src/com/alex/minimalhome/EnvironmentControls.java": "1415b07058758a2a2bd962763428bb1fd05f27cb7b6a7718fad12a3efc757c82",
+    "app/src/com/alex/minimalhome/HomeControls.java": "282fde379241d7b3bb7d82c559a5dcd63a5da5277c15e66ac984fea229c70305",
+    "app/src/com/alex/minimalhome/HomeDevicePolicy.java": "fa9d86369af5d91df2aa2c7722d01cafb8a7b6020d3c05fd69c052ddaa97c971",
+    "app/src/com/alex/minimalhome/HomeDevices.java": "c2f6f4d4bad6b277f9dc27e8c7621cea058b70b8b7f3690a5a8131e97176c071",
+    "app/src/com/alex/minimalhome/MainActivity.java": "16c64efc6aa8bdce2828a55e3d18049c9720a9b0d5162eaa1e32efae27b937d8",
+    "app/src/com/alex/minimalhome/VoiceCommand.java": "1a860ef5f499b20a97f5b239ae04281d2250980d74955ccf15444c73ad3eb933",
+    "app/src/com/alex/minimalhome/VoiceControls.java": "2e027a19a489f23acccd91633b36ea61a80a1623ef054fc462e5f54300d06620",
+    "app/src/com/alex/minimalhome/VoiceIntentEvidence.java": "a6cb9054f4f64866c8ce12f656e492c8a712544b01224fd84eabc5093cfb1909",
+    "app/src/com/alex/minimalhome/VoiceServiceConfig.java": "6439b892cdd0cdcf8ffa340296181e2c0f41d068c72072b01fb0b56b1ceacea6",
+    "app/src/com/alex/minimalhome/VoiceServiceRequest.java": "e2d672a8e00d689aafa1775e12747a1eb1b11039546af01873b764cbc51febe6",
+    "app/src/com/alex/minimalhome/WakeWordControls.java": "4bd773e5032b6823bfa05da2cf3eed45589999bcfe50961baf37026b0c3cbad9",
+    "app/src/com/alex/minimalhome/WarmDashboard.java": "0b93ce40c10c391ab88f5b867d26572a85e7081d5955aff36c78f97450c42882"
+  },
+  "assets": {
+    "app/assets/voice/voice.html": "12b93398f77467894686247bc37d27151439e09e1d0a0acf24720c358235c908"
+  },
+  "backend_sha256": "1b34129c3c4f3cac2e0ef0dce2dcf2ad0bc4410076c119ea723a57b3b7886f23",
+  "full_import": {
+    "account_visible_devices": 19,
+    "current_ha_devices": 2,
+    "current_registry_entities": 53,
+    "planned_added_devices": 17,
+    "planned_removed_devices": 0,
+    "selection_confirmed_saved": false,
+    "original_soak_deadline_utc": "2026-10-31T16:35:24.113601+00:00",
+    "requires_xiaomi_integration_reload": true,
+    "ha_process_restart_required": false,
+    "configuration_tokens_or_registry_ids_published": false,
+    "custom_unmapped_xiaomi_parameters": "read-only config in reviewed local projection",
+    "future_actual_supported_and_online_counts": "not yet known"
+  },
+  "ui": {
+    "installed": true,
+    "version": "2.2",
+    "version_code": 16,
+    "home_display_cards_read_only": true,
+    "center_opens_at_top": true,
+    "keyboard_not_shown": true,
+    "voice_sessions_idle": true
+  },
+  "host_validation": {
+    "voice_service_tests": 94,
+    "page_cases": 33,
+    "page_assertions": 249,
+    "native_policy_controller_assertions": 141,
+    "generic_voice_routing_assertions": 83,
+    "legacy_tool_guard_assertions": 49,
+    "speech_evidence_assertions": 47,
+    "collector_tests": 15,
+    "soak_tests": 13,
+    "import_helper_inert_tests": 11,
+    "all_passed": true,
+    "host_tests_use_real_network_or_device_controls": false,
+    "native_scope": "Inert host policy/controller tests. HTTP transport is a fake; actual private fixture only parsed/prepared. No device, HA, cloud or real service POST."
+  },
+  "voice_query": {
+    "phrase": "家里有哪些设备，只查询状态",
+    "entry": "center microphone",
+    "source": "Mac built-in speaker through air into tablet microphone",
+    "first_attempt": "connected but no user transcript or tool call observed; not counted as successful query",
+    "second_attempt_connected": true,
+    "observed_user_transcript": "教你有哪些设备 支查询状态",
+    "asr_exact_match": false,
+    "tool_requests_delta": 2,
+    "tool_results_delta": 2,
+    "tool_names_individually_captured": false,
+    "observed_answer_fragment": "现在有两台设备都在客厅:温湿度计显示二十五点六",
+    "complete_answer_captured": false,
+    "tablet_audio_player_observed": true,
+    "active_sessions_after_exit": 0,
+    "microphone_muted_after_input": true,
+    "physical_device_commands_tested": false,
+    "wake_word_retested_for_2_2": false,
+    "live_query_backend_sha256": "b52b31665d7ef4a8205e7f054746f851c692012e6252e7758c69a38298536224",
+    "later_backend_change": "model-metadata sanitizer only; covered by offline regression and redeployed while idle"
+  },
+  "readonly_observer": {
+    "started_at_utc": "2026-10-31T15:30:10.946403+00:00",
+    "service_events": [],
+    "observer_errors": [],
+    "processes_before": [
+      {
+        "pid": 6631,
+        "ppid": 6606,
+        "name": "proot",
+        "elapsed": "23:18:30",
+        "start_ticks": "4003",
+        "role": "ha"
+      },
+      {
+        "pid": 6633,
+        "ppid": 6631,
+        "name": "python3",
+        "elapsed": "23:18:30",
+        "start_ticks": "4007",
+        "role": "ha"
+      },
+      {
+        "pid": 10924,
+        "ppid": 1,
+        "name": "proot",
+        "elapsed": "22:55:04",
+        "start_ticks": "144640",
+        "role": "soak"
+      },
+      {
+        "pid": 10929,
+        "ppid": 10924,
+        "name": "python3",
+        "elapsed": "22:55:04",
+        "start_ticks": "144643",
+        "role": "soak"
+      }
+    ],
+    "forwards_before": true,
+    "reverses_before": true,
+    "plug_before": {
+      "state": "on",
+      "last_changed": "2026-10-30T17:22:57.173501+00:00",
+      "last_updated": "2026-10-30T17:22:57.173501+00:00"
+    },
+    "stop_requested": true,
+    "plug_after": {
+      "state": "on",
+      "last_changed": "2026-10-30T17:22:57.173501+00:00",
+      "last_updated": "2026-10-30T17:22:57.173501+00:00"
+    },
+    "processes_after": [
+      {
+        "pid": 6631,
+        "ppid": 6606,
+        "name": "proot",
+        "elapsed": "23:31:01",
+        "start_ticks": "4003",
+        "role": "ha"
+      },
+      {
+        "pid": 6633,
+        "ppid": 6631,
+        "name": "python3",
+        "elapsed": "23:31:01",
+        "start_ticks": "4007",
+        "role": "ha"
+      },
+      {
+        "pid": 10924,
+        "ppid": 1,
+        "name": "proot",
+        "elapsed": "23:07:35",
+        "start_ticks": "144640",
+        "role": "soak"
+      },
+      {
+        "pid": 10929,
+        "ppid": 10924,
+        "name": "python3",
+        "elapsed": "23:07:35",
+        "start_ticks": "144643",
+        "role": "soak"
+      }
+    ],
+    "process_identity_unchanged": true,
+    "plug_state_unchanged": true,
+    "plug_last_changed_unchanged": true,
+    "forwards_after_empty": true,
+    "reverses_after_empty": true,
+    "finished_at_utc": "2026-10-31T15:42:42.954557+00:00"
+  },
+  "stability": {
+    "original_run_id": "2611b389-8b42-4413-86a1-aa0dbf059568",
+    "recorder_reset": false,
+    "recorder_extended": false,
+    "final_logs_collected": false,
+    "long_term_verdict": "pending final original logs",
+    "active_work_inside_sampling_window": "APK upgrades, read-only registry/options previews, UI checks and acoustic state query; retain this interval in final review",
+    "usb_unplug_repeated": false,
+    "mac_ha_started": false,
+    "physical_power_measured": false
+  },
+  "device_control_requests_sent": 0,
+  "limitations": [
+    "19 account-visible devices are not yet 19 HA-imported or controllable devices.",
+    "Unknown/offline/unsupported capabilities remain read-only or unavailable.",
+    "Native control paths validated with inert transport only; no physical switching or adjustment tests.",
+    "The live answer was partially captured and tool names were not individually logged.",
+    "HA state is a cached report, not a physical power measurement.",
+    "Voice broker requires the Mac to remain online; tablet HA and native controls are separate."
+  ]
+}

@@ -1,0 +1,27 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -u
+umask 077
+TABLET_HOME=/data/data/com.termux/files/home/tablet-ha
+export PATH=/data/data/com.termux/files/usr/bin:$PATH
+exec 9>"$TABLET_HOME/service.lock"
+flock -n 9 || exit 0
+rm -f "$TABLET_HOME/STOP"
+termux-wake-lock
+child=''
+cleanup() {
+  if [ -n "$child" ]; then kill -TERM "$child" 2>/dev/null || true; fi
+  termux-wake-unlock
+}
+trap 'cleanup; exit 0' TERM INT HUP
+trap cleanup EXIT
+while [ ! -f "$TABLET_HOME/STOP" ]; do
+  if [ -f "$TABLET_HOME/service.log" ] && [ "$(stat -c %s "$TABLET_HOME/service.log")" -gt 5242880 ]; then
+    mv -f "$TABLET_HOME/service.log" "$TABLET_HOME/service.previous.log"
+  fi
+  "$TABLET_HOME/run-in-ha" /usr/local/bin/python3 -P -m homeassistant --config /config >> "$TABLET_HOME/service.log" 2>&1 &
+  child=$!
+  printf '%s\n' "$child" > "$TABLET_HOME/service.pid"
+  wait "$child" || true
+  child=''
+  [ -f "$TABLET_HOME/STOP" ] || sleep 10
+done

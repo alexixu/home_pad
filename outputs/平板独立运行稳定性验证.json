@@ -1,0 +1,91 @@
+{
+  "status": "tablet-local 24-hour stability recording continues; USB may remain connected; final verdict pending",
+  "run_id": "2611b389-8b42-4413-86a1-aa0dbf059568",
+  "started_utc": "2026-10-30T16:35:24.113601+00:00",
+  "deadline_utc": "2026-10-31T16:35:24.113601+00:00",
+  "timezone": "America/Los_Angeles",
+  "interval_seconds": 60,
+  "duration_seconds": 86400,
+  "first_unplug_user_confirmed": true,
+  "usb_device_absence_observed_during_first_unplug": true,
+  "desktop_refresh_result_during_first_unplug": "not provided",
+  "usb_reconnected_to_install_recorder": true,
+  "tablet_local_recorder_started": true,
+  "initial_sample_summary": {
+    "schema": 1,
+    "run_id": "2611b389-8b42-4413-86a1-aa0dbf059568",
+    "started_utc": "2026-10-30T16:35:24.113601+00:00",
+    "started_epoch": 1793378124.1136012,
+    "deadline_epoch": 1793464524.1136012,
+    "deadline_utc": "2026-10-31T16:35:24.113601+00:00",
+    "duration_seconds": 86400,
+    "interval_seconds": 60,
+    "evidence_limit": "GET reads cached HA reports; it does not measure physical power or force a device refresh.",
+    "status": "running",
+    "summary_utc": "2026-10-30T16:36:24.184817+00:00",
+    "samples": 2,
+    "first_sample_utc": "2026-10-30T16:35:24.133555+00:00",
+    "last_sample_utc": "2026-10-30T16:36:24.134487+00:00",
+    "covered_seconds": 60.00103688240051,
+    "max_sample_gap_seconds": 60.00103688240051,
+    "sample_gaps_over_tolerance": 0,
+    "wall_clock_anomalies": 0,
+    "malformed_log_rows": 0,
+    "api_success_samples": 2,
+    "entity_read_success_samples": 2,
+    "states": {
+      "off": 0,
+      "on": 2,
+      "unavailable": 0,
+      "unexpected": 0,
+      "unknown": 0
+    },
+    "proot_identity_changes_observed": 0,
+    "coverage_complete": false,
+    "physical_usb_unplug_verified": false,
+    "power_control_requests_sent": 0
+  },
+  "final_unplug_user_confirmed": true,
+  "usb_absence_after_monitor_install": true,
+  "power_control_requests_sent": 0,
+  "physical_power_measurement": false,
+  "long_term_verification_complete": false,
+  "sampling_location": "tablet localhost; no Mac or USB data dependency",
+  "log_location_on_tablet": "~/tablet-ha/config/.soak/",
+  "host_log_location": "work/tablet-ha/soak-collected/",
+  "automation_id": "ha",
+  "evidence_boundary": "Samples report HA reachability and cached entity state. Missing evidence and gaps must not be counted as successful verification. The observer must distinguish sampling window from confirmed USB-disconnected window.",
+  "final_unplug_confirmed_utc": "2026-10-30T16:40:40.420263+00:00",
+  "desktop_refresh_after_unplug_user_report": "拔掉，仍显示已开启",
+  "physical_usb_unplug_independent_read_verified": true,
+  "physical_usb_unplug_evidence": [
+    "user confirmed physical disconnection",
+    "ADB serial 834b3988 absent after confirmation",
+    "user refreshed launcher after unplugging and reported on"
+  ],
+  "connection_observations": [
+    {
+      "observed_utc": "2026-10-30T16:43:24.511769+00:00",
+      "transport": "USB",
+      "adb_serial": "834b3988",
+      "adb_transport_id": 3,
+      "wireless_adb_enabled": false,
+      "note": "USB transport observed again during a read-only network-ADB check; reconnection time is unknown. Do not count the entire period since earlier unplug confirmation as continuously disconnected."
+    }
+  ],
+  "usb_unplug_duration_requires_interval_accounting": true,
+  "test_plan_correction": {
+    "recorded_utc": "2026-10-30T17:07:49.510410+00:00",
+    "user_instruction": "不要反复要求插拔USB；允许保持接线进行测试",
+    "usb_may_remain_connected": true,
+    "repeat_physical_unplug_required": false,
+    "long_term_scope": "24-hour stability of tablet-local HA and its cached entity reports; no Mac HA or USB-forward dependency; USB power/diagnostic cable may remain connected",
+    "not_claimed": [
+      "continuous 24-hour physical USB disconnection",
+      "battery endurance",
+      "physical plug power measurement"
+    ],
+    "existing_physical_unplug_functional_evidence_retained": true,
+    "followup_updated": true
+  }
+}

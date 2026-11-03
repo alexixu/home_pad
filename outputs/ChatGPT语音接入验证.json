@@ -1,0 +1,212 @@
+{
+  "version": "2.0",
+  "version_code": 12,
+  "recorded_at_utc": "2026-10-30T19:43:44.079295+00:00",
+  "status": "installed; local entry, wake and authenticated TLS failure path verified; live cloud voice blocked on missing API configuration",
+  "build": {
+    "bytes": 14771593,
+    "sha256": "30d147f4b6ac2adf07a88eb40977376ac3eeb5c642f00c3d5696c385fe1d836e",
+    "sources": {
+      "app/src/com/alex/minimalhome/ControlCenter.java": "b22ce8c28b091cb356f1b712915b36b44d4c18d30f18653ae0005d3dd5bd7571",
+      "app/src/com/alex/minimalhome/EnvironmentControls.java": "1415b07058758a2a2bd962763428bb1fd05f27cb7b6a7718fad12a3efc757c82",
+      "app/src/com/alex/minimalhome/HomeControls.java": "5f88981f9bbedcc50d6097eb1ce704d877e730146ee3f1a1b64e1d4fdac881f6",
+      "app/src/com/alex/minimalhome/MainActivity.java": "cd00d786cd7d1aa84b53b7df06e2bd467a18820f65e7cb57b6a6f30c6808f85c",
+      "app/src/com/alex/minimalhome/VoiceCommand.java": "1a860ef5f499b20a97f5b239ae04281d2250980d74955ccf15444c73ad3eb933",
+      "app/src/com/alex/minimalhome/VoiceControls.java": "de94e5da59fb98d4f12701c189327c485e27c8874f88dd95fb3a26506f996c11",
+      "app/src/com/alex/minimalhome/VoiceIntentEvidence.java": "3ebc4af5e506f0a24c37d83ed16cd3018b553bbeee1d8b8b671af696bf657575",
+      "app/src/com/alex/minimalhome/VoiceServiceConfig.java": "6439b892cdd0cdcf8ffa340296181e2c0f41d068c72072b01fb0b56b1ceacea6",
+      "app/src/com/alex/minimalhome/VoiceServiceRequest.java": "39e2d7e43912cf3850062200a6e36851575a33d79b949c106deafa894325332b",
+      "app/src/com/alex/minimalhome/WakeWordControls.java": "4bd773e5032b6823bfa05da2cf3eed45589999bcfe50961baf37026b0c3cbad9",
+      "app/src/com/alex/minimalhome/WarmDashboard.java": "0ac138d5ba428b591a2ca9d15d0931906a9e0592467557bdf9f3f4e085a91440"
+    },
+    "assets": {
+      "app/assets/voice/voice.html": "2c32ebc9b105c26bed22dfd5db6806aaeb4ccd50c13c8d4833d861b5dbf2acdd"
+    },
+    "manifest_sha256": "9d046abc80527fe4c7903347ffbec7e7482e1b6d29cf69858abb070f032d105f",
+    "source_unchanged": true,
+    "signature_verified": true
+  },
+  "installation": {
+    "installed": true,
+    "original_signing_key_used": true,
+    "method": "adb install --no-incremental -r; retained app data and local HA settings",
+    "version_confirmed_by_package_manager": true,
+    "installed_base_apk_sha256_matches_artifact": true
+  },
+  "architecture": {
+    "wake": "Local sherpa-onnx keyword detector, foreground homepage only",
+    "conversation": "OpenAI GPT-Live API WebRTC; no Android SpeechRecognizer or system TTS fallback",
+    "ha": "Tablet-local localhost API; no HA credentials in broker or model tool results",
+    "broker": "Temporary Mac TLS broker prepared and tested; stopped after QA; independent supervised deployment pending",
+    "api_key_configured": false,
+    "chatgpt_consumer_app_session_reused": false
+  },
+  "offline_checks": {
+    "native_tool_guards": 49,
+    "speech_evidence_boundaries": 28,
+    "page_cases": 26,
+    "page_assertions": 184,
+    "broker_mock_tests": 22,
+    "scope": "Host simulations and source compilation; no live device writes or OpenAI session created"
+  },
+  "live_checks": {
+    "window_utc": {
+      "start": "2026-10-30T19:38:08.659079+00:00",
+      "end": "2026-10-30T19:42:30.096742+00:00"
+    },
+    "central_voice_button": true,
+    "bundle_page_loaded": true,
+    "pairing_imported": true,
+    "transfer_pairing_file_deleted": true,
+    "lan_tls_pin_and_hostname_and_pairing_accepted": true,
+    "cloud_error_displayed": "语音服务尚未配置 OpenAI 访问凭据。",
+    "microphone_inactive_after_error": true,
+    "microphone_inactive_in_control_center": true,
+    "home_wake_restored": true,
+    "acoustic_wake": {
+      "phrase": "你好，小爱",
+      "one_attempt_entered_voice_page": true,
+      "source": "Mac Mandarin synthesis played acoustically; no transcript injection",
+      "accuracy_or_reliability_claim": false
+    },
+    "live_chatgpt_audio_answer_verified": false,
+    "live_cloud_home_tool_verified": false,
+    "spoken_state_query_v20_verified": false,
+    "power_commands_tested": false
+  },
+  "initial_failures_and_fixes": [
+    "Initial loadDataWithBaseURL main document was blocked by the resource allowlist; switched to fixed HTTPS app-assets URL and verified exact bundled document loading.",
+    "WebView audio device initialization required MODIFY_AUDIO_SETTINGS in addition to RECORD_AUDIO; added permission, rebuilt, reinstalled and observed capture followed by credential-missing error and capture release."
+  ],
+  "voice_control_limit": {
+    "confirmation": "No added second confirmation for an accepted explicit spoken operation; touch still confirms",
+    "current_deployment_read_only": true,
+    "guard": "All observed user input is retained for the session; no assistant/query boundary reset. At most one accepted power intention per session; invalid fragments poison write eligibility until new session.",
+    "limitation": "Partial transcripts do not establish a final user turn; later corrections cannot retract an already issued action. Mixed/query-then-control speech may require explicit new session. No live switching tested."
+  },
+  "plug": {
+    "before": {
+      "state": "on",
+      "last_changed": "2026-10-30T17:22:57.173501+00:00",
+      "last_updated": "2026-10-30T17:22:57.173501+00:00"
+    },
+    "after": {
+      "state": "on",
+      "last_changed": "2026-10-30T17:22:57.173501+00:00",
+      "last_updated": "2026-10-30T17:22:57.173501+00:00"
+    },
+    "state_and_last_changed_unchanged": true,
+    "physical_power_not_measured": true
+  },
+  "passive_observation": {
+    "service_events": [],
+    "errors": [],
+    "processes_before": [
+      {
+        "pid": 6631,
+        "ppid": 6606,
+        "name": "proot",
+        "elapsed": "03:26:23",
+        "start_ticks": "4003",
+        "role": "ha"
+      },
+      {
+        "pid": 6633,
+        "ppid": 6631,
+        "name": "python3",
+        "elapsed": "03:26:23",
+        "start_ticks": "4007",
+        "role": "ha"
+      },
+      {
+        "pid": 10924,
+        "ppid": 1,
+        "name": "proot",
+        "elapsed": "03:02:57",
+        "start_ticks": "144640",
+        "role": "soak"
+      },
+      {
+        "pid": 10929,
+        "ppid": 10924,
+        "name": "python3",
+        "elapsed": "03:02:57",
+        "start_ticks": "144643",
+        "role": "soak"
+      }
+    ],
+    "processes_after": [
+      {
+        "pid": 6631,
+        "ppid": 6606,
+        "name": "proot",
+        "elapsed": "03:30:44",
+        "start_ticks": "4003",
+        "role": "ha"
+      },
+      {
+        "pid": 6633,
+        "ppid": 6631,
+        "name": "python3",
+        "elapsed": "03:30:44",
+        "start_ticks": "4007",
+        "role": "ha"
+      },
+      {
+        "pid": 10924,
+        "ppid": 1,
+        "name": "proot",
+        "elapsed": "03:07:18",
+        "start_ticks": "144640",
+        "role": "soak"
+      },
+      {
+        "pid": 10929,
+        "ppid": 10924,
+        "name": "python3",
+        "elapsed": "03:07:18",
+        "start_ticks": "144643",
+        "role": "soak"
+      }
+    ],
+    "process_identity_unchanged": true
+  },
+  "stability_preservation": {
+    "ha_or_recorder_restarted": false,
+    "soak_reset_extended_collected_or_modified": false,
+    "deadline_utc": "2026-10-31T16:35:24Z",
+    "new_samples_independently_checked": false,
+    "long_term_verdict": "Pending original window completion and safe log review",
+    "workload_change": "Launcher upgrades, short microphone capture and keyword playback during ongoing soak; retain interval in final timeline"
+  },
+  "cleanup": {
+    "temporary_ha_forward_removed": true,
+    "reverse_empty": true,
+    "mac_audio_settings_restored": true,
+    "temporary_voice_broker_stopped": true,
+    "tablet_left_on_homepage": true
+  },
+  "screenshot": {
+    "path": "outputs/ChatGPT语音待配置实机.png",
+    "sha256": "58fa54b20919a059f83b0589d8d2b75b0b80c5e65793d8288904d0cd686de0b1",
+    "scope": "Actual final 2.0 tablet page showing missing OpenAI configuration; not a cloud conversation success"
+  },
+  "codex_voice_probe": {
+    "auth": "Existing ChatGPT login; no API key",
+    "versions": [
+      "V2",
+      "V3"
+    ],
+    "result": "Both returned realtime conversation requires API key auth; zero audio chunks",
+    "scope": "Historical WebSocket-only probe; not a WebRTC restriction. No tablet or HA tool calls.",
+    "transport": "websocket"
+  },
+  "pending": [
+    "Private OpenAI API configuration and model access",
+    "Real GPT-Live session.started, audio input/output and read-only home query end to end",
+    "Independent persistent voice broker deployment and restart behavior",
+    "Original 24-hour stability log completion and safe collection"
+  ],
+  "superseded_by": "outputs/Codex语音实机验证.json",
+  "historical_record_note": "This preserves the 2.0 API-path failure. Version 2.1 later verified normal Codex ChatGPT login through V3 WebRTC without an API key; the old pending list is historical."
+}

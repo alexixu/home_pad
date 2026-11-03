@@ -1,0 +1,132 @@
+{
+  "version": "2.1.1",
+  "version_code": 14,
+  "recorded_at_utc": "2026-10-31T05:33:39.936902+00:00",
+  "scope": "Visual-only homepage voice icon requested by user: off-white sphere, subtle lower shadow, dark-gray microphone and two dotted rings. Original touch target and callbacks retained; landscape caption moved down 6 design units.",
+  "build": {
+    "apk_sha256": "61f2ce3dfe47cdbdd79d560645a04a6cf233512f2ef40216da05f39560ac04b2",
+    "bytes": 14775689,
+    "manifest_sha256": "48837c16b1bd09f2d3a779d9664a48c7b4bb6daf53e192af712275da26e8017b",
+    "dashboard_sha256": "dc246ebdb737ee4c20b90b8982cdcab79cc9262857ac08209c84ec18fff73268",
+    "signature_verified": true,
+    "installed_apk_matches_build": true,
+    "installed_version_confirmed": true
+  },
+  "unchanged_from_v21": {
+    "only_java_source_changed": "WarmDashboard.java",
+    "voice_page_assets_identical": true,
+    "voice_and_wake_and_ha_logic_unchanged": true,
+    "pairing_and_control_settings_unchanged": true
+  },
+  "validation": {
+    "host_landscape_and_portrait_rendered": true,
+    "host_missing_data_layout_rendered": true,
+    "existing_host_ui_checks_passed": true,
+    "real_tablet_homepage_visually_checked": true,
+    "voice_accessibility_entry_present": true,
+    "cloud_voice_or_wake_not_retested": true,
+    "cloud_sessions_created_during_update": 0,
+    "power_commands_tested": false,
+    "host_preview_limit": "Java2D font/blur differences; live screenshot proves landscape appearance only"
+  },
+  "observation": {
+    "started_at_utc": "2026-10-31T05:32:13.112933+00:00",
+    "finished_at_utc": "2026-10-31T05:32:51.068432+00:00",
+    "plug_before": {
+      "state": "on",
+      "last_changed": "2026-10-30T17:22:57.173501+00:00",
+      "last_updated": "2026-10-30T17:22:57.173501+00:00"
+    },
+    "plug_after": {
+      "state": "on",
+      "last_changed": "2026-10-30T17:22:57.173501+00:00",
+      "last_updated": "2026-10-30T17:22:57.173501+00:00"
+    },
+    "processes_before": [
+      {
+        "pid": 6631,
+        "ppid": 6606,
+        "name": "proot",
+        "elapsed": "13:20:30",
+        "start_ticks": "4003",
+        "role": "ha"
+      },
+      {
+        "pid": 6633,
+        "ppid": 6631,
+        "name": "python3",
+        "elapsed": "13:20:30",
+        "start_ticks": "4007",
+        "role": "ha"
+      },
+      {
+        "pid": 10924,
+        "ppid": 1,
+        "name": "proot",
+        "elapsed": "12:57:04",
+        "start_ticks": "144640",
+        "role": "soak"
+      },
+      {
+        "pid": 10929,
+        "ppid": 10924,
+        "name": "python3",
+        "elapsed": "12:57:04",
+        "start_ticks": "144643",
+        "role": "soak"
+      }
+    ],
+    "processes_after": [
+      {
+        "pid": 6631,
+        "ppid": 6606,
+        "name": "proot",
+        "elapsed": "13:21:07",
+        "start_ticks": "4003",
+        "role": "ha"
+      },
+      {
+        "pid": 6633,
+        "ppid": 6631,
+        "name": "python3",
+        "elapsed": "13:21:07",
+        "start_ticks": "4007",
+        "role": "ha"
+      },
+      {
+        "pid": 10924,
+        "ppid": 1,
+        "name": "proot",
+        "elapsed": "12:57:41",
+        "start_ticks": "144640",
+        "role": "soak"
+      },
+      {
+        "pid": 10929,
+        "ppid": 10924,
+        "name": "python3",
+        "elapsed": "12:57:41",
+        "start_ticks": "144643",
+        "role": "soak"
+      }
+    ],
+    "process_identity_unchanged": true,
+    "plug_state_unchanged": true,
+    "plug_last_changed_unchanged": true,
+    "service_events": [],
+    "observer_errors": [],
+    "forwards_after_empty": true,
+    "reverses_after_empty": true
+  },
+  "soak": {
+    "reset_extended_collected_or_modified": false,
+    "deadline_utc": "2026-10-31T16:35:24Z",
+    "long_term_verdict": "Pending original run completion and safe log review",
+    "workload": "Launcher upgrade and homepage screenshot during ongoing soak; retain this interval in the final timeline"
+  },
+  "screenshot": {
+    "path": "outputs/语音图标2.1.1实机.png",
+    "sha256": "81bc98d59b13e2f31a54873676c9ce9fe989f137cdc8085732bd1932b1e50cf5",
+    "scope": "Actual installed 2.1.1 landscape homepage; visible values are HA cached reports, not physical power measurements"
+  }
+}

@@ -1,0 +1,366 @@
+{
+  "version": "2.1",
+  "version_code": 13,
+  "recorded_at_utc": "2026-10-31T05:26:28.012808+00:00",
+  "status": "Installed and verified real ChatGPT voice using normal Codex login over V3 WebRTC; two read-only home queries passed. Normal control configured afterward; physical switching untested.",
+  "build": {
+    "bytes": 14775689,
+    "sha256": "4a67864bba20e91b751f881f7c12f82c931ebb213330dd67db3e865bc00a6b66",
+    "sources": {
+      "app/src/com/alex/minimalhome/ControlCenter.java": "b22ce8c28b091cb356f1b712915b36b44d4c18d30f18653ae0005d3dd5bd7571",
+      "app/src/com/alex/minimalhome/EnvironmentControls.java": "1415b07058758a2a2bd962763428bb1fd05f27cb7b6a7718fad12a3efc757c82",
+      "app/src/com/alex/minimalhome/HomeControls.java": "5f88981f9bbedcc50d6097eb1ce704d877e730146ee3f1a1b64e1d4fdac881f6",
+      "app/src/com/alex/minimalhome/MainActivity.java": "cd00d786cd7d1aa84b53b7df06e2bd467a18820f65e7cb57b6a6f30c6808f85c",
+      "app/src/com/alex/minimalhome/VoiceCommand.java": "1a860ef5f499b20a97f5b239ae04281d2250980d74955ccf15444c73ad3eb933",
+      "app/src/com/alex/minimalhome/VoiceControls.java": "a0cf2a65c86479c53c8bab521fd9aa6eeab48acd6be538dde1ec13994f6331f1",
+      "app/src/com/alex/minimalhome/VoiceIntentEvidence.java": "3ebc4af5e506f0a24c37d83ed16cd3018b553bbeee1d8b8b671af696bf657575",
+      "app/src/com/alex/minimalhome/VoiceServiceConfig.java": "6439b892cdd0cdcf8ffa340296181e2c0f41d068c72072b01fb0b56b1ceacea6",
+      "app/src/com/alex/minimalhome/VoiceServiceRequest.java": "e2d672a8e00d689aafa1775e12747a1eb1b11039546af01873b764cbc51febe6",
+      "app/src/com/alex/minimalhome/WakeWordControls.java": "4bd773e5032b6823bfa05da2cf3eed45589999bcfe50961baf37026b0c3cbad9",
+      "app/src/com/alex/minimalhome/WarmDashboard.java": "0ac138d5ba428b591a2ca9d15d0931906a9e0592467557bdf9f3f4e085a91440"
+    },
+    "assets": {
+      "app/assets/voice/voice.html": "6008401dccc382406d7e94c4a0eceb7352da09efe4bac1a6d5e8a217809fa31f"
+    },
+    "manifest_sha256": "168b721e679ab8e128dfbc5ae0ce4f7372ea7a56b5ec1d028374f16b201f77d5",
+    "source_unchanged": true,
+    "signature_verified": true
+  },
+  "installation": {
+    "apk_sha256": "4a67864bba20e91b751f881f7c12f82c931ebb213330dd67db3e865bc00a6b66",
+    "bytes": 14775689,
+    "installed_apk_matches": true,
+    "source_matches_build": true,
+    "original_signature_verified_by_build": true,
+    "versionName": "2.1",
+    "versionCode": 13
+  },
+  "service_source_sha256": {
+    "work/voice-service/server.py": "4511917a5f206ac1da7eea53c392c9a10a7f6f6ff1fe08a88802de26eb58e664",
+    "work/voice-service/codex_backend.py": "9eb60715bf296cb68574cf4b6e562770df50a3f8507cd1df103c1b678dc03ead",
+    "work/voice-service/install_service.py": "c9347533f2b3096756de17f0efbec6a24a783040326d9052c41ba9ce52cb04fd",
+    "work/voice-service/configure.py": "2d0b192cd42037bfc95d36a300c1ecc589d59db03d04b79cdc5b7b5101f88533",
+    "work/voice-service/test_codex_backend.py": "b2d4ad9ae35303671b1c5bbdfb3df4291d16c405cf1dadbe4d0f99a030dcfb11",
+    "work/voice-service/test_codex_http.py": "3f21426f87f489bdd570887ad983b955ea9caef416d991f3251f73b4f24c66bd",
+    "work/voice-service/test_install_service.py": "4bb2b78e5dabd4fd70b0c30c3a286996b3539569824dbc7a9c727cb70f5525a0",
+    "work/voice-service/test_server.py": "efae568caef91ec798f335f87c6dd550302f53aaf5cfe43496c6444d1b520ef9"
+  },
+  "architecture": {
+    "provider": "codex-app-server",
+    "protocol": "experimental V3 WebRTC",
+    "cli_version": "codex-cli 0.165.0-alpha.1.2",
+    "auth": "Existing normal official Codex ChatGPT login; CLI manages authentication",
+    "api_key_required_for_verified_route": false,
+    "api_key_used": false,
+    "auth_tokens_read_exported_or_copied": false,
+    "first_party_client_identity_impersonated": false,
+    "existing_chatgpt_conversation_reused": false,
+    "audio": "Tablet WebRTC directly to OpenAI; no Android ASR/system TTS conversation fallback",
+    "wake": "Local sherpa-onnx, foreground homepage with focus only",
+    "home_tools": "Native tablet refresh and validation; HA credentials and entity IDs stay off broker/model",
+    "codex_scope": "Ephemeral read-only thread in an empty temporary directory; shell, external networking tools and other capabilities disabled; inherited MCP service names disabled individually and tool count rechecked as zero",
+    "tool_outputs": "Bounded allowlisted fields only; HA cache reports do not prove physical power"
+  },
+  "live_queries": [
+    {
+      "entry": "central voice button",
+      "query": "室内温度是多少",
+      "start_utc": "2026-10-31T05:13:38.151827+00:00",
+      "end_utc": "2026-10-31T05:14:10.859712+00:00",
+      "user_transcript_matched": true,
+      "assistant_answer": "我帮你看看。现在室内温度是二十五点六摄氏度。",
+      "get_home_status_requests": 1,
+      "tool_results": 1,
+      "cloud_audio_playback_observed": true,
+      "playback_evidence": "Android AudioPlaybackConfiguration: AAudio started, VOICE_COMMUNICATION, built-in speaker deviceId=3 for the launcher UID",
+      "microphone_muted_after_test_input": true,
+      "home_returned": true,
+      "active_cloud_sessions_after_close": 0,
+      "mac_audio_settings_restored": true,
+      "test_mode_read_only": true,
+      "power_commands_spoken": false
+    },
+    {
+      "entry": "acoustic wake",
+      "query": "烤箱插座现在是什么状态",
+      "start_utc": "2026-10-31T05:15:37.915865+00:00",
+      "end_utc": "2026-10-31T05:16:23.944922+00:00",
+      "user_transcript_matched": true,
+      "assistant_answer": "我看一下你现在能看到的内容,确认烤箱插座的状态。显示是开启状态,网络也可用,不过这不是实时功率的测量。要不要我再去核对一下实时读数?",
+      "get_home_status_requests": 1,
+      "tool_results": 1,
+      "cloud_audio_playback_observed": true,
+      "playback_evidence": "Android AudioPlaybackConfiguration: AAudio started, VOICE_COMMUNICATION, built-in speaker deviceId=3 for the launcher UID",
+      "microphone_muted_after_test_input": true,
+      "home_returned": true,
+      "active_cloud_sessions_after_close": 0,
+      "mac_audio_settings_restored": true,
+      "test_mode_read_only": true,
+      "power_commands_spoken": false
+    }
+  ],
+  "wake_scope": {
+    "phrase": "你好，小爱",
+    "one_final_attempt_entered_voice": true,
+    "audio_source": "Mac Mandarin speech played acoustically through speaker to tablet microphone; no transcript injection",
+    "reliability_rate_claimed": false,
+    "screen_off_wake_supported": false
+  },
+  "offline_checks": {
+    "native_tool_guards": 49,
+    "speech_evidence_boundaries": 28,
+    "page_cases": 33,
+    "page_assertions": 249,
+    "python_service_tests": 79,
+    "python_breakdown": {
+      "codex_backend": 18,
+      "codex_http": 20,
+      "legacy_api": 22,
+      "installer": 19
+    },
+    "scope": "Host simulations and compilation; no live power operations or cloud/device calls from these tests"
+  },
+  "supervised_service": {
+    "label": "com.alex.homepad.voice",
+    "installed": true,
+    "running_authenticated_health_verified": true,
+    "keep_alive_recovery": {
+      "before": {
+        "label": "com.alex.homepad.voice",
+        "managed_plist_exists": true,
+        "loaded": true,
+        "managed_origin": true,
+        "state": "running",
+        "pid": 50876
+      },
+      "after": {
+        "label": "com.alex.homepad.voice",
+        "managed_plist_exists": true,
+        "loaded": true,
+        "managed_origin": true,
+        "state": "running",
+        "pid": 50907,
+        "last_exit_code": 0
+      },
+      "new_pid": true,
+      "authenticated_health_after": {
+        "service": "home-pad-voice",
+        "version": 2,
+        "provider": "codex-app-server",
+        "configured": true,
+        "authentication": "managed_by_codex",
+        "allowControl": false,
+        "sessions": {
+          "sessions_created": 0,
+          "tool_requests": 0,
+          "tool_results": 0,
+          "sessions_closed": 0,
+          "active_sessions": 0,
+          "pending_sessions": 0
+        }
+      },
+      "method": "SIGTERM only the verified owned voice broker with no active sessions; launchd KeepAlive restarted it",
+      "ha_or_tablet_process_signaled": false
+    },
+    "requirements": [
+      "macOS GUI login",
+      "Mac awake",
+      "Mac and tablet network access",
+      "Valid normal Codex ChatGPT login"
+    ],
+    "mac_reboot_logout_sleep_recovery_tested": false,
+    "tablet_ha_independent_of_voice_broker": true
+  },
+  "normal_control_configuration": {
+    "applied_at_utc": "2026-10-31T05:23:37.511087+00:00",
+    "server_allow_control": true,
+    "native_read_only": false,
+    "saved_setting_reopened_and_verified": true,
+    "voice_session_opened_after_mode_change": false,
+    "power_command_sent": false,
+    "normal_mode_live_power_verified": false,
+    "confirmation": "No second confirmation for accepted explicit voice commands; touch still confirms",
+    "guard": "Both endpoints must permit control; native observed original input, fixed target, connection and fresh state checks remain mandatory. At most one power intention per session; mixed/query/corrected input can require re-entry."
+  },
+  "observation_windows": [
+    {
+      "started_at_utc": "2026-10-31T05:00:58.542199+00:00",
+      "finished_at_utc": "2026-10-31T05:05:24.520785+00:00",
+      "process_identity_unchanged": true,
+      "plug_before": {
+        "state": "on",
+        "last_changed": "2026-10-30T17:22:57.173501+00:00",
+        "last_updated": "2026-10-30T17:22:57.173501+00:00"
+      },
+      "plug_after": {
+        "state": "on",
+        "last_changed": "2026-10-30T17:22:57.173501+00:00",
+        "last_updated": "2026-10-30T17:22:57.173501+00:00"
+      },
+      "plug_state_unchanged": true,
+      "plug_last_changed_unchanged": true,
+      "service_events": [],
+      "observer_errors": [],
+      "forwards_after_empty": true,
+      "reverses_after_empty": true
+    },
+    {
+      "started_at_utc": "2026-10-31T05:06:59.786341+00:00",
+      "finished_at_utc": "2026-10-31T05:10:25.105131+00:00",
+      "process_identity_unchanged": true,
+      "plug_before": {
+        "state": "on",
+        "last_changed": "2026-10-30T17:22:57.173501+00:00",
+        "last_updated": "2026-10-30T17:22:57.173501+00:00"
+      },
+      "plug_after": {
+        "state": "on",
+        "last_changed": "2026-10-30T17:22:57.173501+00:00",
+        "last_updated": "2026-10-30T17:22:57.173501+00:00"
+      },
+      "plug_state_unchanged": true,
+      "plug_last_changed_unchanged": true,
+      "service_events": [],
+      "observer_errors": [],
+      "forwards_after_empty": true,
+      "reverses_after_empty": true
+    },
+    {
+      "started_at_utc": "2026-10-31T05:12:52.238630+00:00",
+      "finished_at_utc": "2026-10-31T05:24:00.689979+00:00",
+      "process_identity_unchanged": true,
+      "plug_before": {
+        "state": "on",
+        "last_changed": "2026-10-30T17:22:57.173501+00:00",
+        "last_updated": "2026-10-30T17:22:57.173501+00:00"
+      },
+      "plug_after": {
+        "state": "on",
+        "last_changed": "2026-10-30T17:22:57.173501+00:00",
+        "last_updated": "2026-10-30T17:22:57.173501+00:00"
+      },
+      "plug_state_unchanged": true,
+      "plug_last_changed_unchanged": true,
+      "service_events": [],
+      "observer_errors": [],
+      "forwards_after_empty": true,
+      "reverses_after_empty": true
+    }
+  ],
+  "final_process_identity": {
+    "processes_before": [
+      {
+        "pid": 6631,
+        "ppid": 6606,
+        "name": "proot",
+        "elapsed": "13:01:09",
+        "start_ticks": "4003",
+        "role": "ha"
+      },
+      {
+        "pid": 6633,
+        "ppid": 6631,
+        "name": "python3",
+        "elapsed": "13:01:09",
+        "start_ticks": "4007",
+        "role": "ha"
+      },
+      {
+        "pid": 10924,
+        "ppid": 1,
+        "name": "proot",
+        "elapsed": "12:37:43",
+        "start_ticks": "144640",
+        "role": "soak"
+      },
+      {
+        "pid": 10929,
+        "ppid": 10924,
+        "name": "python3",
+        "elapsed": "12:37:43",
+        "start_ticks": "144643",
+        "role": "soak"
+      }
+    ],
+    "processes_after": [
+      {
+        "pid": 6631,
+        "ppid": 6606,
+        "name": "proot",
+        "elapsed": "13:12:16",
+        "start_ticks": "4003",
+        "role": "ha"
+      },
+      {
+        "pid": 6633,
+        "ppid": 6631,
+        "name": "python3",
+        "elapsed": "13:12:16",
+        "start_ticks": "4007",
+        "role": "ha"
+      },
+      {
+        "pid": 10924,
+        "ppid": 1,
+        "name": "proot",
+        "elapsed": "12:48:50",
+        "start_ticks": "144640",
+        "role": "soak"
+      },
+      {
+        "pid": 10929,
+        "ppid": 10924,
+        "name": "python3",
+        "elapsed": "12:48:50",
+        "start_ticks": "144643",
+        "role": "soak"
+      }
+    ],
+    "process_identity_unchanged": true
+  },
+  "initial_failures_and_fixes": [
+    "WebSocket probes returned API-key-required; normal-login V3 WebRTC succeeded. The earlier generalization to all Codex voice was incorrect.",
+    "An early tablet run captured unrelated ambient speech and did not establish a successful home query. Raw captures stay local and are excluded from publication; later runs muted while connecting and after the known test input.",
+    "A controlled ordinary temperature question initially produced no home tool request. includeStartupContext=true fixed delegation; final installed temperature and plug queries each produced one native request and result.",
+    "MCP empty-table override alone retained inherited server entries. Explicit per-server disabling plus runtime zero-tool verification prevents using inherited external tools.",
+    "LaunchAgent bootout is asynchronous. Installer now waits for confirmed label absence before reinstall; actual reload and KeepAlive recovery passed. IPv6 listener arguments are rejected because the HTTP server is IPv4."
+  ],
+  "stability_preservation": {
+    "ha_or_recorder_restarted": false,
+    "soak_reset_extended_collected_or_modified": false,
+    "deadline_utc": "2026-10-31T16:35:24Z",
+    "new_samples_independently_checked": false,
+    "long_term_verdict": "Pending original deadline and safe log review",
+    "physical_power_measured": false,
+    "power_commands_tested": false,
+    "workload_change": "Launcher upgrades, brief acoustic wake/audio queries and normal voice configuration saved during original soak. Retain all observation windows and intervening gaps in final timeline; not continuous unattended or continuous USB-disconnected evidence."
+  },
+  "cleanup": {
+    "active_cloud_sessions": 0,
+    "temporary_ha_forward_removed": true,
+    "reverse_empty": true,
+    "mac_audio_settings_restored": true,
+    "tablet_returned_home": true,
+    "owned_voice_service_left_running": true,
+    "pairing_credentials_not_published": true
+  },
+  "screenshots": [
+    {
+      "path": "outputs/ChatGPT语音温度查询实机.png",
+      "sha256": "1bfaa72d6fa693e4e18b468ae7452c522217c698a5f81740c315c4bd385a518b",
+      "scope": "Actual 2.1 read-only tablet test. Known test question and cloud answer only; microphone muted after test input."
+    },
+    {
+      "path": "outputs/ChatGPT语音插座查询实机.png",
+      "sha256": "c4cf9b8626af6a06271b8c64b95bef4fa63c0fb3a7725c1f1aabeae9cf08cb7d",
+      "scope": "Actual 2.1 read-only tablet test. Known test question and cloud answer only; microphone muted after test input."
+    }
+  ],
+  "limitations": [
+    "Experimental CLI protocol may change; account availability is not guaranteed for other accounts.",
+    "Normal mode configured but physical power switching intentionally untested.",
+    "Only two final read-only questions and one wake attempt; no reliability or prolonged voice-session claim.",
+    "24-hour recorder results have not been collected or evaluated.",
+    "Current voice broker requires Mac; tablet HA remains independent."
+  ]
+}

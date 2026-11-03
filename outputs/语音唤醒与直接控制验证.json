@@ -1,0 +1,219 @@
+{
+  "version": "1.9",
+  "version_code": 11,
+  "reviewed_at_utc": "2026-10-30T18:13:36.926315+00:00",
+  "scope": "本地源码、未签名隔离构建、宿主机模型及控制流验证；没有平板安装或实机操作。",
+  "behavior": {
+    "homepage": "时钟、环境、设备卡片只展示；底部搜索、中央语音、控制中心三个入口。",
+    "wake_word": "你好，小爱",
+    "wake_engine": "sherpa-onnx 2.0.1 local KWS",
+    "wake_scope": "麦克风获授权且首页前台有焦点时；后台/熄屏/搜索/控制中心/其他对话框/语音会话时暂停。",
+    "wake_audio": "仅内存处理；应用不保存或上传唤醒音频。",
+    "command_recognition": "Android 系统 ASR；可用时优先设备端；系统服务可能联网。",
+    "voice_power_confirmation": false,
+    "touch_power_confirmation": true,
+    "voice_power_guard": "仅最终识别或提交文字的明确单条开/关目标；绑定原连接，读取并校验状态，最多一次服务请求，不自动重试。目标状态已满足时不发送。",
+    "cancel_pending_on_pause_or_close": true
+  },
+  "build": {
+    "type": "isolated unsigned APK",
+    "java_compilation": true,
+    "dex_conversion": true,
+    "resource_packaging": true,
+    "zipaligned": true,
+    "bytes": 14743788,
+    "sha256": "dc42a9461acdfea6ceaf81ffdceaef3e2900d62abd6eef38cff78c5d726b2389",
+    "signature_verified": false,
+    "installed": false,
+    "packaged_dependency_hashes_verified": 11,
+    "original_signing_files_untouched": true,
+    "outputs_apk_untouched": true,
+    "dependency_packaging": "only validated allowlisted assets and two arm64-v8a native libraries"
+  },
+  "sources": {
+    "work/minimal-launcher/app/src/com/alex/minimalhome/ControlCenter.java": "b22ce8c28b091cb356f1b712915b36b44d4c18d30f18653ae0005d3dd5bd7571",
+    "work/minimal-launcher/app/src/com/alex/minimalhome/EnvironmentControls.java": "1415b07058758a2a2bd962763428bb1fd05f27cb7b6a7718fad12a3efc757c82",
+    "work/minimal-launcher/app/src/com/alex/minimalhome/HomeControls.java": "5f88981f9bbedcc50d6097eb1ce704d877e730146ee3f1a1b64e1d4fdac881f6",
+    "work/minimal-launcher/app/src/com/alex/minimalhome/MainActivity.java": "e9a8c3831ef37a65193abbb870c6312689d3f1d3e33caffda7c9f39cda499414",
+    "work/minimal-launcher/app/src/com/alex/minimalhome/VoiceCommand.java": "1a860ef5f499b20a97f5b239ae04281d2250980d74955ccf15444c73ad3eb933",
+    "work/minimal-launcher/app/src/com/alex/minimalhome/VoiceControls.java": "68402d4cdf637a7d3b2475ce7294cae22ce23f26dda9bcae069531c5cebfe892",
+    "work/minimal-launcher/app/src/com/alex/minimalhome/WakeWordControls.java": "4bd773e5032b6823bfa05da2cf3eed45589999bcfe50961baf37026b0c3cbad9",
+    "work/minimal-launcher/app/src/com/alex/minimalhome/WarmDashboard.java": "0ac138d5ba428b591a2ca9d15d0931906a9e0592467557bdf9f3f4e085a91440"
+  },
+  "manifest_sha256": "703cb5c6d05d3afad705063e1c7989cc4213686b534839f2d3fbbc83a0a19f63",
+  "scripts": {
+    "work/minimal-launcher/build.py": "ef703f3bd94030575124b3419fd3b4f2f015c6b08cd3c0138871d483216fce46",
+    "work/minimal-launcher/prepare_wake_dependencies.py": "7414b7af19ad8225d3bebc2c40f52e11d1fd267d42932679a43a92b620f07dd3",
+    "work/minimal-launcher/check_wake_word.py": "eacba00c1d92ba0e5b89df3c1cc46a22a54fdf54e831d6d28a7901d4c25ca5a2"
+  },
+  "dependency_hashes": {
+    "tools/wake-deps/sherpa-onnx-jvm-2.0.1.jar": "8320e2457b6e38dd624fb619d3552e11ef78ffeb394622056126b16f2fd99d12",
+    "tools/wake-deps/prepared/assets/wakeword/encoder.int8.onnx": "4ded45b30961270f2a9a64bede4569b324c36d4f3a772c1b35bb70a244150675",
+    "tools/wake-deps/prepared/assets/wakeword/decoder.onnx": "fb581d6734511676e246e0dff2fea01b31b0913176cb3ca64576dbab0a177774",
+    "tools/wake-deps/prepared/assets/wakeword/joiner.int8.onnx": "f79760052b87239e325f0567c752ad3130b30d92effb847d4307743c20c59a24",
+    "tools/wake-deps/prepared/assets/wakeword/tokens.txt": "72316508d9119696145abc6f1f8cdc46287535c34e5ce7e595f845cb1499cf2e",
+    "tools/wake-deps/prepared/assets/wakeword/MODEL_README.md": "dd0ec68b5d9ee736f016fc982078bd3cdbccc69057e9910bdd45580992d13367",
+    "tools/wake-deps/prepared/assets/wakeword/keywords.txt": "9293cb326cfd3b9359da1c8af96615d65e650be55270de1ddbd6004e49472e94",
+    "tools/wake-deps/prepared/jniLibs/arm64-v8a/libsherpa-onnx-jni.so": "5db8f89f12b2c900a98c9e01e00c475c59db35e9437a62e36e27839ec48b5575",
+    "tools/wake-deps/prepared/jniLibs/arm64-v8a/libonnxruntime.so": "33847ad43bffe204699fd4a27f7f3603452a8cdaf2f9a44983a0bc31ffcf2da1",
+    "tools/wake-deps/prepared/assets/licenses/sherpa-LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "tools/wake-deps/prepared/assets/licenses/onnxruntime-LICENSE": "2f07c72751aed99790b8a4869cf2311df85a860b22ded05fa22803587a48922c",
+    "tools/wake-deps/prepared/assets/licenses/onnxruntime-ThirdPartyNotices.txt": "0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2"
+  },
+  "validation": {
+    "parser": {
+      "source_sha256": "1a860ef5f499b20a97f5b239ae04281d2250980d74955ccf15444c73ad3eb933",
+      "results": [
+        "VoiceCommand: 126 cases passed; no Android or device calls.",
+        "VoiceCommand boundaries: 46 cases passed; parser only, no device calls."
+      ],
+      "device_operations": false,
+      "cases_passed": 172
+    },
+    "voice_power_guards": {
+      "source_sha256": "5f88981f9bbedcc50d6097eb1ce704d877e730146ee3f1a1b64e1d4fdac881f6",
+      "result": "VoicePower guards: 55 assertions passed; extracted production methods with inert state/worker stubs; no Android or network calls.",
+      "scope": "Production API bodies extracted verbatim; Android state and worker mocked, no actual device or Android runtime behavior proven",
+      "device_operations": false,
+      "assertions_passed": 55
+    },
+    "wake_model": {
+      "host_only": true,
+      "synthetic_audio": true,
+      "audio_played": false,
+      "microphone_used": false,
+      "tablet_contacted": false,
+      "tablet_wake_accuracy_verified": false,
+      "cases": [
+        {
+          "phrase": "你好，小爱",
+          "expected": "你好小爱",
+          "actual": "你好小爱",
+          "passed": true
+        },
+        {
+          "phrase": "你好小爱",
+          "expected": "你好小爱",
+          "actual": "你好小爱",
+          "passed": true
+        },
+        {
+          "phrase": "小爱",
+          "expected": "",
+          "actual": "",
+          "passed": true
+        },
+        {
+          "phrase": "你好",
+          "expected": "",
+          "actual": "",
+          "passed": true
+        },
+        {
+          "phrase": "你好，小明",
+          "expected": "",
+          "actual": "",
+          "passed": true
+        },
+        {
+          "phrase": "今天天气怎么样",
+          "expected": "",
+          "actual": "",
+          "passed": true
+        },
+        {
+          "phrase": "[silence]",
+          "expected": "",
+          "actual": "",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    "dashboard": {
+      "render_type": "host Java2D execution of unchanged WarmDashboard Canvas source, not Android runtime screenshots",
+      "limitations": [
+        "macOS fonts substitute Android fonts",
+        "blur/shadow effects are not reproduced",
+        "view lifecycle and accessibility modeled by minimal stubs; not Android runtime proof"
+      ],
+      "watermark": "离线设计预览 · 示例数据",
+      "source_sha256": "0ac138d5ba428b591a2ca9d15d0931906a9e0592467557bdf9f3f4e085a91440",
+      "source_unchanged": true,
+      "fixture": "historical UI record sample values; not current live device readings",
+      "device_operations": false,
+      "host_only_behavior_checks": {
+        "read_only_labels": 5,
+        "clickable_navigation_entries": 3,
+        "long_click_handlers": 0,
+        "read_only_accessibility_click_and_long_click_blocked": true,
+        "callbacks_invoked_only_for_three_entries": true,
+        "read_only_touch_down_move_up_cancel_consumed_without_action": true,
+        "all_hit_targets_inside_viewport": true
+      }
+    },
+    "lifecycle": {
+      "evidence": "Production MainActivity handoff/dispatch and VoiceControls pause/resume/permission/cleanup methods extracted unchanged except removal of super.onPause(). Surrounding Android/HA collaborators are inert host-only fakes. No Android/device/real command proof.",
+      "result": "LifecycleFixed: 25 checks passed",
+      "sources": {
+        "MainActivity": "e9a8c3831ef37a65193abbb870c6312689d3f1d3e33caffda7c9f39cda499414",
+        "VoiceControls": "68402d4cdf637a7d3b2475ce7294cae22ce23f26dda9bcae069531c5cebfe892",
+        "WakeWordControls": "4bd773e5032b6823bfa05da2cf3eed45589999bcfe50961baf37026b0c3cbad9",
+        "HomeControls": "5f88981f9bbedcc50d6097eb1ce704d877e730146ee3f1a1b64e1d4fdac881f6"
+      },
+      "checks_passed": 25
+    },
+    "wake_cleanup_fault_injection": {
+      "evidence": "Full unchanged production WakeWordControls.java compiled with inert host Android/sherpa fakes. Fake AudioRecord emits no real audio, fake keyword spotter uses no model, no network/Android/HA calls. Tests exercise actual worker cleanup, failure suppression, barrier and cancellation paths; not native/device proof.",
+      "result": "WakeFakeTest: 19 checks passed",
+      "source_sha256": "4bd773e5032b6823bfa05da2cf3eed45589999bcfe50961baf37026b0c3cbad9",
+      "checks_passed": 19
+    }
+  },
+  "previews": [
+    {
+      "path": "outputs/语音入口横屏设计预览.png",
+      "sha256": "cf7f5e7e30ac7aeac93ca1a261d30c8660ef88d5352103d26b396f5440b5d51f",
+      "png_chunks": [
+        "IDAT",
+        "IEND",
+        "IHDR"
+      ]
+    },
+    {
+      "path": "outputs/语音入口竖屏设计预览.png",
+      "sha256": "4549d2cfb9696f38fc2afe377c6eddb67434f502ac95364679a2c9d3ed9a88a3",
+      "png_chunks": [
+        "IDAT",
+        "IEND",
+        "IHDR"
+      ]
+    }
+  ],
+  "limitations": [
+    "宿主机模型仅使用同一合成声音的 2 个正例、4 个反例和 1 段静音；不证明真人、距离、噪声、唤醒率或耗电。",
+    "Canvas 预览使用 Java2D 与最小 Android 替身；字体/阴影近似，示例数值不是当前读数。",
+    "控制流测试使用惰性 Android/HA 替身，不证明真实平台生命周期、权限、ASR 服务和麦克风交接。",
+    "未做实际通断、物理功率、长期运行或重新启动验证。"
+  ],
+  "device_actions": {
+    "tablet_contacted": false,
+    "apk_installed": false,
+    "ha_accessed": false,
+    "plug_service_commands_sent": 0,
+    "microphone_used": false,
+    "audio_played": false,
+    "recorder_changed": false,
+    "soak_logs_collected_or_reset": false,
+    "usb_action_requested": false
+  },
+  "soak_evidence": "保留既有只读采样窗口和历史拔线证据。本次未回收日志，长期稳定性结论仍待汇总。",
+  "publication_review": {
+    "obvious_credentials_in_candidate_texts": false,
+    "png_metadata_only_image_chunks": true,
+    "historical_unbound_microphone_preview_excluded": true,
+    "private_configs_keys_models_binaries_and_raw_logs_excluded": true,
+    "known_local_secrets_compared_without_displaying": true,
+    "credential_findings": 0
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "service_before": {
+    "state": "on",
+    "last_changed": "2026-10-30T15:03:37.051911+00:00",
+    "last_updated": "2026-10-30T15:03:37.051911+00:00",
+    "friendly_name": "烤箱插座"
+  },
+  "desktop_online": [
+    {
+      "text": "搜索应用",
+      "enabled": "true"
+    },
+    {
+      "text": "烤箱插座",
+      "enabled": "true"
+    },
+    {
+      "text": "已开启",
+      "enabled": "true"
+    },
+    {
+      "text": "关闭",
+      "enabled": "true"
+    },
+    {
+      "text": "刷新",
+      "enabled": "true"
+    }
+  ],
+  "desktop_wifi_off": [
+    {
+      "text": "搜索应用",
+      "enabled": "true"
+    },
+    {
+      "text": "烤箱插座",
+      "enabled": "true"
+    },
+    {
+      "text": "状态未知 · 平板网络未连接",
+      "enabled": "true"
+    },
+    {
+      "text": "等待状态",
+      "enabled": "false"
+    },
+    {
+      "text": "刷新",
+      "enabled": "true"
+    }
+  ],
+  "wifi_restored_requested": true,
+  "real_power_commands_sent": false,
+  "desktop_wifi_recovered": [
+    {
+      "text": "搜索应用",
+      "enabled": "true"
+    },
+    {
+      "text": "烤箱插座",
+      "enabled": "true"
+    },
+    {
+      "text": "已开启",
+      "enabled": "true"
+    },
+    {
+      "text": "关闭",
+      "enabled": "true"
+    },
+    {
+      "text": "刷新",
+      "enabled": "true"
+    }
+  ],
+  "state_after_wifi_recovery": {
+    "state": "on",
+    "last_changed": "2026-10-30T16:10:13.365772+00:00",
+    "last_updated": "2026-10-30T16:10:13.365772+00:00"
+  },
+  "reboot_requested_utc": "2026-10-30T16:10:57.873174+00:00",
+  "boot_id_before": "d2550bf2-2a4c-4d42-b57a-685465171b53",
+  "boot_id_after": "64eeca8e-90b8-4281-8113-68087e1748e9",
+  "boot_completed_utc": "2026-10-30T16:11:24.217954+00:00",
+  "reboot_service_ready_utc": "2026-10-30T16:12:16.809503+00:00",
+  "state_after_reboot": {
+    "state": "on",
+    "last_changed": "2026-10-30T16:12:25.251603+00:00",
+    "last_updated": "2026-10-30T16:12:25.251603+00:00"
+  },
+  "automatic_start_without_manual_launch": true,
+  "desktop_after_reboot": [
+    {
+      "text": "搜索应用",
+      "enabled": "true"
+    },
+    {
+      "text": "烤箱插座",
+      "enabled": "true"
+    },
+    {
+      "text": "已开启",
+      "enabled": "true"
+    },
+    {
+      "text": "关闭",
+      "enabled": "true"
+    },
+    {
+      "text": "刷新",
+      "enabled": "true"
+    }
+  ],
+  "adb_forward_and_reverse_empty_before_idle": true,
+  "adb_disconnected_screen_off_utc": "2026-10-30T16:13:21.141728+00:00",
+  "adb_reconnected_utc": "2026-10-30T16:14:54.402885+00:00",
+  "state_after_90s_screen_off_without_adb": {
+    "state": "on",
+    "last_changed": "2026-10-30T16:12:25.251603+00:00",
+    "last_updated": "2026-10-30T16:12:25.251603+00:00"
+  },
+  "physical_usb_unplug_test": false,
+  "date_local": "2026-10-30",
+  "timezone": "America/Los_Angeles",
+  "launcher_version": "1.3",
+  "launcher_version_code": 4,
+  "ha_version": "2026.10.4",
+  "ha_location": "tablet Termux/proot",
+  "launcher_url": "http://127.0.0.1:8123",
+  "termux_autostart_enabled": true,
+  "termux_boot_autostart_enabled": true,
+  "battery_policy": "unrestricted for Termux and Termux:Boot",
+  "mac_ha_and_colima": "stopped",
+  "old_mac_start_entry": "disabled; prints tablet instructions only",
+  "real_switching_test": false,
+  "long_duration_unattended_test": false,
+  "observed_plug_state": "on",
+  "limitation": "USB cable remained physically attached; ADB server was stopped and all forwards/reverses were empty during the 90-second screen-off check.",
+  "final_adb_reverse_empty": true,
+  "final_adb_forward_empty": true,
+  "apk_sha256": "7f2ca88d76c26f5b57ef77f62c82bddb7308a0071f0b7cd1700ed74735f0ca66"
+}

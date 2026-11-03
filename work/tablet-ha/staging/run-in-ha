@@ -1,0 +1,6 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -e
+TABLET_HOME=/data/data/com.termux/files/home/tablet-ha
+unset LD_PRELOAD
+export PROOT_TMP_DIR=/data/data/com.termux/files/usr/tmp
+exec /data/data/com.termux/files/usr/bin/proot --root-id --link2symlink --sysvipc --kill-on-exit --rootfs="$TABLET_HOME/rootfs" --bind=/dev --bind=/proc --bind=/sys --bind="$TABLET_HOME/config:/config" --cwd=/config /usr/bin/env -i HOME=/root PATH=/usr/local/bin:/usr/bin:/bin LANG=C.UTF-8 TMPDIR=/tmp PYTHONMALLOC=mimalloc "$@"

@@ -1,0 +1,11 @@
+{
+  "device_token_file": "device-token.txt",
+  "api_key_file": null,
+  "certificate_file": "tls-cert.pem",
+  "private_key_file": "tls-key.pem",
+  "model": "gpt-live-1",
+  "backend_model": "gpt-6-luna",
+  "allow_control": false,
+  "sessions_per_minute": 3,
+  "provider": "codex"
+}

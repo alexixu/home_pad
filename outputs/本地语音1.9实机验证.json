@@ -1,0 +1,137 @@
+{
+  "version": "1.9",
+  "version_code": 11,
+  "source_commit": "6b442042c42d624bee972a1d03b962b48fc07168",
+  "apk_sha256": "860ad43d4789ecba4eddfd94ee96d9e570d29b478239b2cda0ecc5d1e401dc54",
+  "original_signing_key_used": true,
+  "apk_signature_verified": true,
+  "installed": true,
+  "install_method": "adb install --no-incremental -r; app data retained",
+  "test_window_utc": {
+    "start": "2026-10-30T18:52:13.451095+00:00",
+    "end": "2026-10-30T18:57:40.590473+00:00"
+  },
+  "scope": "语音入口、本地唤醒和只读状态查询；用户随后明确要求接入 ChatGPT Voice，当前系统 ASR 实现不视为满足最终需求。",
+  "entry": {
+    "center_button_opens_voice": true,
+    "home_restores_wake_listener": true
+  },
+  "acoustic_wake": {
+    "one_success_observed": true,
+    "trigger": "你好，小爱",
+    "input": "Mac 内置扬声器的中文 TTS，经空气进入平板麦克风；非文本注入。",
+    "another_trial_did_not_trigger": true,
+    "accuracy_or_reliability_claim": false
+  },
+  "query": {
+    "spoken_text": "室内温度是多少",
+    "recognized_text": "室内温度是多少",
+    "answer": "室内温度 25.6 摄氏度。",
+    "passed": true,
+    "input_timing": "tap 后约0.8秒播放，先前等UI转储后播放的尝试未听清；两轮音量亦不同，未单独隔离原因。",
+    "weather_and_plug_queries_passed": false
+  },
+  "plug": {
+    "before": {
+      "state": "on",
+      "last_changed": "2026-10-30T17:22:57.173501+00:00",
+      "last_updated": "2026-10-30T17:22:57.173501+00:00"
+    },
+    "after": {
+      "state": "on",
+      "last_changed": "2026-10-30T17:22:57.173501+00:00",
+      "last_updated": "2026-10-30T17:22:57.173501+00:00"
+    },
+    "state_and_last_changed_unchanged": true,
+    "physical_power_not_measured": true,
+    "switch_commands_tested": false
+  },
+  "passive_observation": {
+    "event_subscription": "Home Assistant call_service; read-only WebSocket subscription",
+    "service_events": [],
+    "errors": [],
+    "processes_before": [
+      {
+        "pid": 6631,
+        "ppid": 6606,
+        "name": "proot",
+        "elapsed": "02:40:28",
+        "start_ticks": "4003",
+        "role": "ha"
+      },
+      {
+        "pid": 6633,
+        "ppid": 6631,
+        "name": "python3",
+        "elapsed": "02:40:28",
+        "start_ticks": "4007",
+        "role": "ha"
+      },
+      {
+        "pid": 10924,
+        "ppid": 1,
+        "name": "proot",
+        "elapsed": "02:17:02",
+        "start_ticks": "144640",
+        "role": "soak"
+      },
+      {
+        "pid": 10929,
+        "ppid": 10924,
+        "name": "python3",
+        "elapsed": "02:17:02",
+        "start_ticks": "144643",
+        "role": "soak"
+      }
+    ],
+    "processes_after": [
+      {
+        "pid": 6631,
+        "ppid": 6606,
+        "name": "proot",
+        "elapsed": "02:45:54",
+        "start_ticks": "4003",
+        "role": "ha"
+      },
+      {
+        "pid": 6633,
+        "ppid": 6631,
+        "name": "python3",
+        "elapsed": "02:45:54",
+        "start_ticks": "4007",
+        "role": "ha"
+      },
+      {
+        "pid": 10924,
+        "ppid": 1,
+        "name": "proot",
+        "elapsed": "02:22:28",
+        "start_ticks": "144640",
+        "role": "soak"
+      },
+      {
+        "pid": 10929,
+        "ppid": 10924,
+        "name": "python3",
+        "elapsed": "02:22:28",
+        "start_ticks": "144643",
+        "role": "soak"
+      }
+    ],
+    "process_identity_unchanged": true
+  },
+  "stability_preservation": {
+    "ha_or_recorder_restarted_by_test": false,
+    "soak_reset_or_extended": false,
+    "soak_logs_collected": false,
+    "new_samples_not_independently_checked": true,
+    "long_term_verdict": "pending existing window completion and log review",
+    "workload_change": "launcher upgraded and short microphone/voice tests during ongoing soak; retain this interval in final stability timeline"
+  },
+  "cleanup": {
+    "temporary_forward_removed": true,
+    "reverse_empty": true,
+    "mac_volume_restored_to_zero_and_muted": true
+  },
+  "next_requirement": "Replace Android ASR/TTS voice conversation with the user-selected ChatGPT/OpenAI voice integration; local keyword detection can remain for wake entry. No live ChatGPT/API integration verified."
+}

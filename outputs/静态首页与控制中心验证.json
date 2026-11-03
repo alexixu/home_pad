@@ -1,0 +1,121 @@
+{
+  "version": "1.7",
+  "version_code": 9,
+  "checked_at_utc": "2026-10-30T17:50:26.275799+00:00",
+  "status": "source_review_and_offline_validation_only",
+  "scope": {
+    "source_base_commit": "c6a0b57eea1c5b6ae245e5556f514aa928e7e01b",
+    "device_accessed": false,
+    "app_signed_or_installed": false,
+    "real_device_ui_tested": false,
+    "power_commands_sent": 0,
+    "physical_power_measurement": false,
+    "soak_collected_reset_extended_or_modified": false,
+    "long_term_verification_complete": false,
+    "parallel_work_excluded": "后续语音功能及其权限/源码改动未纳入本次 1.7 快照；不覆盖或安装这些本地改动。"
+  },
+  "build": {
+    "checks": {
+      "javac": 0,
+      "d8": 0,
+      "aapt2_compile": 0,
+      "aapt2_link": 0
+    },
+    "source_sha256": {
+      "work/minimal-launcher/app/AndroidManifest.xml": "638a6b469bc1c35a362cc402f294767252bcfe3beacca8d7b36d43d5c24ddadb",
+      "work/minimal-launcher/app/res/xml/network_security_config.xml": "9187f485f22fde712aea8de5243664710440a9ee08e9f1b172978eef96a15001",
+      "work/minimal-launcher/app/src/com/alex/minimalhome/ControlCenter.java": "b22ce8c28b091cb356f1b712915b36b44d4c18d30f18653ae0005d3dd5bd7571",
+      "work/minimal-launcher/app/src/com/alex/minimalhome/EnvironmentControls.java": "1415b07058758a2a2bd962763428bb1fd05f27cb7b6a7718fad12a3efc757c82",
+      "work/minimal-launcher/app/src/com/alex/minimalhome/HomeControls.java": "210594363ea5f6f07a8ae05030087a419369e06aed42803baf4622b1defbb962",
+      "work/minimal-launcher/app/src/com/alex/minimalhome/MainActivity.java": "0be4a4e6c4057f124d23fee0e8cf866745dd8707290434ae44853719411bd11f",
+      "work/minimal-launcher/app/src/com/alex/minimalhome/WarmDashboard.java": "065c9854063e0de4b5d88adbfe95bbcf4325fe8719ae7b731403f55ac47b67ea"
+    },
+    "permissions": [
+      "android.permission.INTERNET",
+      "android.permission.ACCESS_NETWORK_STATE",
+      "com.termux.permission.RUN_COMMAND"
+    ],
+    "signed": false
+  },
+  "home_interaction": {
+    "display_only": [
+      "时钟日期",
+      "室内温湿度",
+      "室外天气",
+      "插座状态",
+      "待接入灯光"
+    ],
+    "navigation_entries": [
+      "搜索应用",
+      "控制中心"
+    ],
+    "card_click_or_long_press_actions": false,
+    "power_controls_on_home": false
+  },
+  "control_center_review": [
+    "设备操作仅从控制中心进入二次确认；确认目标固定，状态或连接变化后失效。",
+    "状态未知或请求处理中禁用电源操作；刷新路径仅 GET。",
+    "Home、Back、Activity停止时关闭操作对话框；环境和家居设置不能从展示卡片进入。",
+    "控制中心使用可滚动原生控件，宽屏双列、窄屏纵排；本次只做源码审查和编译，未进行 Android 实机布局检查。"
+  ],
+  "offline_home_preview": {
+    "render_type": "host Java2D execution of unchanged WarmDashboard Canvas source, not Android runtime screenshots",
+    "fixture": "historical UI record sample values; not current live device readings",
+    "source_sha256": "065c9854063e0de4b5d88adbfe95bbcf4325fe8719ae7b731403f55ac47b67ea",
+    "host_only_behavior_checks": {
+      "read_only_labels": 5,
+      "clickable_navigation_entries": 2,
+      "long_click_handlers": 0,
+      "read_only_accessibility_click_and_long_click_blocked": true,
+      "callbacks_invoked_only_for_two_entries": true,
+      "read_only_touch_down_move_up_cancel_consumed_without_action": true,
+      "all_hit_targets_inside_viewport": true
+    },
+    "reviewed_viewports": [
+      [
+        2560,
+        1600
+      ],
+      [
+        1600,
+        2560
+      ]
+    ],
+    "missing_data_fixture_reviewed": true,
+    "observed_layout_issue": null,
+    "limitations": [
+      "macOS fonts substitute Android fonts",
+      "blur/shadow effects are not reproduced",
+      "view lifecycle and accessibility modeled by minimal stubs; not Android runtime proof"
+    ],
+    "artifacts": [
+      {
+        "path": "outputs/静态首页横屏设计预览.png",
+        "sha256": "ad2d45f066a280401cbf80b3fc3ad9c9670ce80a0709cea6ec19fcd3a001ad62",
+        "pixels": [
+          2560,
+          1600
+        ],
+        "type": "offline_source_render_not_device_screenshot",
+        "watermark": "离线设计预览 · 示例数据"
+      },
+      {
+        "path": "outputs/静态首页竖屏设计预览.png",
+        "sha256": "fcbe5f8b85ac4bc04f6c39caae85a657c5ca99a01619e9ed3d9e25d6aa6acb18",
+        "pixels": [
+          1600,
+          2560
+        ],
+        "type": "offline_source_render_not_device_screenshot",
+        "watermark": "离线设计预览 · 示例数据"
+      }
+    ]
+  },
+  "evidence_limits": [
+    "所有 1.7 结论仅覆盖此处源码摘要和离线环境，不是当前平板安装状态证明。",
+    "预览使用历史样例值，不是当前设备读数；字体与阴影和 Android 实机存在差异。",
+    "交互断言基于最小主机桩，不替代 Android 触摸、无障碍和生命周期测试。",
+    "未测试插座真实通断，未重跑网络恢复、重启或长期稳定性测试。",
+    "1.4、1.5、1.6 实机截图另存历史记录，不能用于证明 1.7 实机行为。"
+  ]
+}

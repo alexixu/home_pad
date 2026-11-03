@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; media-src 'self' blob: mediastream:; connect-src 'none'; img-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>ChatGPT 语音</title>
+  <style>
+    :root{color-scheme:light;--paper:#fff8ec;--ink:#493724;--soft:#84613e;--gold:#c59750;--line:#e9d9c1;--surface:#fffdf7;--error:#9a4c3b}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 0 100%,#f0e1c9 0,transparent 52%),radial-gradient(ellipse at 100% 0,#f4e6d1 0,transparent 50%),var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans CJK SC",sans-serif;-webkit-tap-highlight-color:transparent}
+    button{font:inherit;cursor:pointer;color:inherit;touch-action:manipulation}button:focus-visible{outline:3px solid #94652e;outline-offset:5px}button:disabled{cursor:default;opacity:.48}button svg{width:23px;height:23px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .page{max-width:1120px;margin:auto;min-height:100vh;padding:clamp(20px,4vw,44px);display:flex;flex-direction:column;gap:24px}.top{display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:40px;height:40px;border:1px solid #c9a570;border-radius:50%;display:grid;place-items:center;font-family:Georgia,serif;font-size:22px;color:#8a6336}.brand small{display:block;color:var(--soft);font-size:12px;letter-spacing:.06em;margin-bottom:3px}h1{font-size:20px;font-weight:600;line-height:1.3;margin:0}.close{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:#fffaf1}
+    main{flex:1;display:grid;grid-template-columns:minmax(230px,.85fr) minmax(280px,1.15fr);gap:clamp(25px,5vw,64px);align-items:center}.voice{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:20px 0}.orb-wrap{position:relative;width:214px;height:214px;display:grid;place-items:center;margin:6px 0 10px}.halo{position:absolute;inset:0;border:1px solid #dec7a4;border-radius:50%;transition:transform .4s,opacity .4s;opacity:.8}.halo.inner{inset:13px;border-color:#ead9bf}.orb{width:170px;height:170px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 33% 25%,#f4e4c9,#dfbf91 70%);box-shadow:inset 0 1px 0 #fffaf3,0 16px 38px #b9955b15;color:#79572f;position:relative}.orb svg{width:58px;height:58px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.wave{display:none;align-items:center;justify-content:center;gap:6px;height:55px}.wave i{display:block;width:5px;height:20px;border-radius:5px;background:#806038;animation:wave 1.25s ease-in-out infinite;animation-delay:calc(var(--i)*-.18s)}.connected .wave{display:flex}.connected .orb svg{display:none}.connected .halo{animation:breathe 3s ease-in-out infinite}.muted .wave i{animation:none;height:7px;opacity:.45}.connecting .orb{animation:breathe 2.2s ease-in-out infinite}.error .orb{background:radial-gradient(circle at 33% 25%,#f7e4d4,#e4c3aa);color:var(--error)}
+    #status{font-size:23px;line-height:1.4;font-weight:500;margin:0;min-height:32px}.detail{font-size:14px;line-height:1.7;color:var(--soft);max-width:310px;min-height:48px;margin:0}.connection{display:flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.03em;color:var(--soft)}.dot{width:6px;height:6px;background:#bdaa90;border-radius:50%}.connected .dot{background:#8b986a}.connecting .dot{background:#c59750}.error .dot{background:#af6b50}.privacy{font-size:12px;color:var(--soft);line-height:1.6;margin:2px 0 0}
+    .conversation{display:flex;flex-direction:column;gap:16px;min-width:0}.conversation h2{font-size:13px;color:var(--soft);font-weight:500;letter-spacing:.06em;margin:0 0 -3px}.bubble{border:1px solid var(--line);border-radius:23px;background:#fffdf6bd;padding:22px 24px;min-height:125px}.bubble.assistant{background:#f0e2cc99;border-color:#e5d1b3}.label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--soft);margin:0 0 12px}.label span{width:5px;height:5px;border-radius:50%;background:#bd9a66}.transcript{margin:0;font-size:18px;line-height:1.65;max-height:170px;overflow:auto;overflow-wrap:anywhere;white-space:pre-wrap;scrollbar-color:#d8c09b transparent}.placeholder{color:var(--soft);font-size:15px}.hint{font-size:13px;line-height:1.8;color:var(--soft);margin:0 4px}.controls{display:flex;align-items:center;justify-content:center;gap:14px;padding:8px 0 3px}.button{display:flex;align-items:center;justify-content:center;gap:10px;border-radius:28px;min-height:54px;padding:0 26px;border:1px solid var(--line);background:#fffaf1;font-size:15px}.button.primary{background:#e4c89f;border-color:#d8b782;min-width:158px}.button.end{background:#f3e7d6}.button[hidden],.hint[hidden],#play[hidden]{display:none}#play{margin:0 auto;font-size:13px;padding:0 18px;min-height:44px}audio{display:none}
+    @keyframes wave{0%,100%{transform:scaleY(.55)}50%{transform:scaleY(1.65)}}@keyframes breathe{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.035);opacity:1}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+    @media(max-width:700px){.page{gap:16px;padding:22px 24px 28px}main{grid-template-columns:1fr;gap:13px}.voice{padding:8px 0;gap:11px}.orb-wrap{width:182px;height:182px;margin:0 0 5px}.orb{width:146px;height:146px}.orb svg{width:49px;height:49px}.detail{min-height:24px}.conversation{gap:12px}.bubble{padding:17px 20px;min-height:96px;border-radius:21px}.transcript{font-size:16px;max-height:120px}.conversation h2{display:none}.label{margin-bottom:8px}.privacy{margin-top:0}.controls{padding-top:6px;gap:10px}.button{padding:0 22px}.top h1{font-size:19px}}
+    @media(max-height:550px) and (min-width:701px){.page{padding:16px 28px;gap:10px}.voice{padding:0;gap:8px}.orb-wrap{width:150px;height:150px;margin:0}.orb{width:122px;height:122px}.orb svg{width:43px;height:43px}.detail{min-height:24px}.bubble{min-height:95px;padding:15px 20px}.transcript{max-height:100px;font-size:16px}.controls{padding:0}.privacy{display:none}}
+  </style>
+</head>
+<body>
+<div class="page" id="page">
+  <header class="top"><div class="brand"><div class="brand-mark" aria-hidden="true">✦</div><div><small>家的声音</small><h1>ChatGPT 语音</h1></div></div><button class="close" id="close" aria-label="关闭语音，返回首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+  <main>
+    <section class="voice" aria-labelledby="status">
+      <div class="orb-wrap" aria-hidden="true"><div class="halo"></div><div class="halo inner"></div><div class="orb"><svg viewBox="0 0 48 48"><rect x="17" y="7" width="14" height="24" rx="7"/><path d="M11 24v2a13 13 0 0 0 26 0v-2M24 39v7M16 46h16"/></svg><div class="wave"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i></div></div></div>
+      <p id="status" role="status" aria-live="polite">随时聊聊</p>
+      <p class="detail" id="detail">可以问室内温度、天气，或聊聊今天的安排。</p>
+      <div class="connection"><span class="dot"></span><span id="connection">尚未连接</span></div>
+      <p class="privacy">进入对话后，语音将发送至 OpenAI 服务。</p>
+    </section>
+    <section class="conversation" aria-label="当前对话文字">
+      <h2>对话</h2>
+      <div class="bubble"><p class="label"><span></span>你说</p><p class="transcript placeholder" id="user">开始后，识别到的文字会显示在这里。</p></div>
+      <div class="bubble assistant"><p class="label"><span></span>ChatGPT</p><p class="transcript placeholder" id="assistant">连接后会显示可查询和可控制的家居设备。</p></div>
+      <p class="hint" id="hint">例如：“室内温度多少？”</p>
+      <button id="play" class="button" hidden>播放语音回答</button>
+    </section>
+  </main>
+  <footer class="controls"><button id="start" class="button primary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 10 7-10 7z"/></svg><span>开始对话</span></button><button id="mute" class="button" aria-pressed="false" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg><span id="mute-label">静音</span></button><button id="end" class="button end" hidden>结束对话</button></footer>
+</div>
+<audio id="remote" autoplay playsinline></audio>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const ui = {page:$('page'),status:$('status'),detail:$('detail'),connection:$('connection'),user:$('user'),assistant:$('assistant'),hint:$('hint'),start:$('start'),mute:$('mute'),muteLabel:$('mute-label'),end:$('end'),play:$('play'),audio:$('remote')};
+  const MAX_TEXT = 4096, MAX_EVENT = 131072, MAX_CALLS = 128;
+  let current = null, sequence = 0, eventSequence = 0;
+  const native = (name, ...args) => {
+    try {
+      if (!window.HomeVoice || typeof window.HomeVoice[name] !== 'function') return false;
+      window.HomeVoice[name](...args);
+      return true;
+    } catch (_) { return false; }
+  };
+  const live = run => current === run && !run.stopped && !run.closing;
+  const text = (value, maximum = MAX_TEXT) => typeof value === 'string' ? value.slice(-maximum) : '';
+  const validId = value => typeof value === 'string' && value.length > 0 && value.length <= 200;
+  const state = (run, kind, title, detail, connection) => {
+    if (run && current !== run) return;
+    ui.page.className = 'page ' + kind + (run && run.muted ? ' muted' : '');
+    ui.status.textContent = title;
+    ui.detail.textContent = detail;
+    ui.connection.textContent = connection;
+    native('notifyState', kind, title, run ? run.id : '');
+  };
+  const controls = (active, closing = false) => {
+    ui.start.hidden = active || closing;
+    ui.start.disabled = closing;
+    ui.mute.hidden = !active;
+    ui.mute.disabled = closing;
+    ui.end.hidden = !active && !closing;
+    ui.end.disabled = closing;
+    ui.end.textContent = closing ? '正在结束…' : '结束对话';
+  };
+  const displayTranscript = (element, value) => {
+    element.textContent = text(value);
+    element.classList.toggle('placeholder', !value);
+    element.scrollTop = element.scrollHeight;
+  };
+  function showModeHint(run) {
+    ui.hint.textContent = run.readOnly
+      ? '当前仅查询状态，不会改变设备状态。例如：“室内温度多少？”'
+      : run.evidenceInvalid
+        ? '本次对话的设备控制已暂停，状态查询仍可继续。重新开始对话后可再发控制指令。'
+        : '可查询家中设备、温湿度与天气，并控制设备目录中支持的功能。请说清房间、设备和目标，例如“把主卧灯亮度调到百分之五十”，无需再次确认。每次对话限一次控制；查询后要控制，请重新开始。离线或只读设备无法控制。';
+  }
+  function timer(run, fn, milliseconds) {
+    const handle = setTimeout(() => { run.timers.delete(handle); fn(); }, milliseconds);
+    run.timers.add(handle);
+    return handle;
+  }
+  function clearTimers(run) {
+    for (const handle of run.timers) clearTimeout(handle);
+    run.timers.clear();
+  }
+  function releaseStream(stream) {
+    if (!stream) return;
+    for (const track of stream.getTracks()) {
+      try { track.enabled = false; track.stop(); } catch (_) {}
+    }
+  }
+  function releaseMedia(run) {
+    releaseStream(run.stream);
+    run.stream = null;
+    for (const stream of run.remoteStreams) releaseStream(stream);
+    run.remoteStreams.clear();
+    for (const track of run.remoteTracks) {
+      try { track.stop(); } catch (_) {}
+    }
+    run.remoteTracks.clear();
+    if (current === run) {
+      try { ui.audio.pause(); } catch (_) {}
+      ui.audio.srcObject = null;
+      ui.play.hidden = true;
+    }
+  }
+  function closeNative(run) {
+    if (run.nativeClosed) return;
+    run.nativeClosed = true;
+    native('closeSession', run.id);
+  }
+  function cleanup(run, kind = 'idle', message = '对话已结束', detail = '需要时，可以再次开始。') {
+    if (!run || run.stopped) return;
+    run.stopped = true;
+    clearTimers(run);
+    if (run.finishGathering) run.finishGathering();
+    releaseMedia(run);
+    run.calls.clear(); run.responses.clear(); run.delegations.clear();
+    run.pendingEvents.length = 0;
+    try { if (run.dc) run.dc.close(); } catch (_) {}
+    try { if (run.pc) run.pc.close(); } catch (_) {}
+    closeNative(run);
+    if (current === run) {
+      state(run, kind, message, detail, kind === 'error' ? '连接未完成' : '麦克风已关闭');
+      current = null;
+      controls(false);
+    }
+  }
+  function fail(run, message) {
+    if (!live(run)) return;
+    cleanup(run, 'error', '暂时无法连接', message);
+  }
+  function send(run, event) {
+    if (!live(run) || !run.ready || !run.dc || run.dc.readyState !== 'open') return false;
+    try {
+      run.dc.send(JSON.stringify({...event, event_id:'home_' + run.id + '_' + (++eventSequence)}));
+      return true;
+    } catch (_) {
+      fail(run, '语音连接已中断，请重试。');
+      return false;
+    }
+  }
+  function maybeReady(run) {
+    if (!live(run) || !run.pc || run.pc.connectionState !== 'connected'
+        || !run.dc || run.dc.readyState !== 'open' || !run.sessionStarted) return;
+    run.ready = true;
+    if (run.connectTimeout) { clearTimeout(run.connectTimeout); run.timers.delete(run.connectTimeout); run.connectTimeout = null; }
+    state(run, 'connected', run.muted ? '麦克风已静音' : '我在听', run.muted ? '你仍可以听到回答。' : '自然地说就好，也可以随时打断。', '已连接 ChatGPT');
+    if (run.context) { const context = run.context; run.context = ''; appendContext(context); }
+    for (const [id, call] of run.calls) if (call.output && !call.resultSent) flushToolOutput(run,id,call);
+    const queued = run.pendingEvents.splice(0);
+    for (const raw of queued) receive(run,raw);
+  }
+  function responseFor(run, envelope, event) {
+    const delegationId = validId(envelope.delegation_id) ? envelope.delegation_id : '';
+    const responseId = validId(event.response_id) ? event.response_id
+      : event.response && validId(event.response.id) ? event.response.id
+      : run.delegations.get(delegationId);
+    if (!responseId) return null;
+    let response = run.responses.get(responseId);
+    if (!response) {
+      if (run.responses.size >= MAX_CALLS) { fail(run, '这次对话较长，请重新开始。'); return null; }
+      response = {id:responseId,completed:false,continued:false,calls:new Set()};
+      run.responses.set(responseId, response);
+    }
+    if (delegationId) run.delegations.set(delegationId, responseId);
+    return response;
+  }
+  function maybeContinue(run, response) {
+    if (!live(run) || !response || !response.completed || response.continued || !response.calls.size) return;
+    for (const id of response.calls) {
+      const call = run.calls.get(id);
+      if (!call || !call.resultSent) return;
+    }
+    response.continued = send(run, {type:'response.create'});
+  }
+  function onToolResult(callId, result, requestId) {
+    const run = current;
+    if (!run || !live(run) || run.id !== requestId || run.backend === 'codex') return false;
+    const call = run.calls.get(callId);
+    if (!call || call.resultSent || call.output) return false;
+    let output;
+    try {
+      if (typeof result === 'string') result = JSON.parse(result);
+      if (!result || typeof result !== 'object' || Array.isArray(result)) throw new Error();
+      output = JSON.stringify(result);
+      if (output.length > 16000) throw new Error();
+    } catch (_) { output = JSON.stringify({ok:false,error:'invalid_tool_result'}); }
+    call.output = output;
+    if (run.ready) return flushToolOutput(run,callId,call);
+    return true;
+  }
+  function flushToolOutput(run,callId,call) {
+    if (!live(run) || !run.ready || call.resultSent || !call.output) return false;
+    if (!send(run, {type:'response.item.create',item:{type:'function_call_output',call_id:callId,output:call.output}})) return false;
+    call.resultSent = true;
+    if (call.timeout) { clearTimeout(call.timeout); run.timers.delete(call.timeout); }
+    maybeContinue(run, run.responses.get(call.responseId));
+    return true;
+  }
+  function receiveCall(run, envelope, event) {
+    const item = event.item;
+    if (!item || item.type !== 'function_call' || !validId(item.call_id)) return;
+    // Only complete function items are dispatched. Argument fragments never invoke native code.
+    if (run.calls.has(item.call_id)) return;
+    if (run.calls.size >= MAX_CALLS) { fail(run, '这次对话较长，请重新开始。'); return; }
+    const response = responseFor(run, envelope, event);
+    if (!response || response.completed || response.continued) { fail(run, '查询响应顺序异常，请重新开始。'); return; }
+    const call = {responseId:response.id,resultSent:false,output:null,timeout:null};
+    run.calls.set(item.call_id, call); response.calls.add(item.call_id);
+    let argumentsValue;
+    try {
+      if (typeof item.arguments !== 'string' || item.arguments.length > 4000) throw new Error();
+      argumentsValue = JSON.parse(item.arguments);
+      if (!argumentsValue || typeof argumentsValue !== 'object' || Array.isArray(argumentsValue)) throw new Error();
+      const keys = Object.keys(argumentsValue).sort().join(',');
+      if (item.name === 'get_home_status') {
+        if (keys) throw new Error();
+      } else if (item.name === 'set_device_power') {
+        if (keys !== 'device,power,utterance' || argumentsValue.device !== 'oven_plug'
+            || !['on','off'].includes(argumentsValue.power)
+            || typeof argumentsValue.utterance !== 'string' || !argumentsValue.utterance.trim()
+            || argumentsValue.utterance.length > 160) throw new Error();
+        if (run.readOnly) {
+          onToolResult(item.call_id,{ok:false,error:'read_only_mode'},run.id);
+          return;
+        }
+      } else {
+        onToolResult(item.call_id,{ok:false,error:'unsupported_tool'},run.id);
+        return;
+      }
+    } catch (_) {
+      onToolResult(item.call_id,{ok:false,error:'invalid_arguments'},run.id);
+      return;
+    }
+    call.timeout = timer(run, () => {
+      if (live(run) && !call.resultSent) fail(run, '家居状态读取超时，请重新开始。');
+    }, 35000);
+    if (!native('runTool', item.call_id, item.name, JSON.stringify(argumentsValue), run.id))
+      onToolResult(item.call_id,{ok:false,error:'native_tool_unavailable'},run.id);
+  }
+  function invalidateEvidence(run) {
+    if (!live(run) || run.evidenceInvalid) return;
+    run.evidenceInvalid = true;
+    showModeHint(run);
+    // Native must poison this request's evidence, not clear it into a reusable candidate.
+    if (!native('invalidateEvidence',run.id)) fail(run,'语音校验暂不可用，请重新开始。');
+  }
+  function transcriptEvidence(run, role, event) {
+    if (role === 'user' && run.evidenceInvalid) return;
+    const invalid = typeof event.delta !== 'string' || !event.delta.length || event.delta.length > 512
+        || !Number.isFinite(event.start_ms) || !Number.isFinite(event.end_ms)
+        || event.start_ms < 0 || event.end_ms < event.start_ms
+        || event.end_ms > 86400000;
+    if (invalid || role === 'user' && (event.start_ms < run.userEvidenceStart
+        || event.end_ms < run.userEvidenceEnd || run.userEvidenceLength + event.delta.length > 512)) {
+      if (role === 'user') invalidateEvidence(run);
+      return;
+    }
+    if (role === 'user') {
+      // Approximate intervals may overlap, but neither endpoint may move backwards.
+      run.userEvidenceStart = event.start_ms;
+      run.userEvidenceEnd = event.end_ms;
+      run.userEvidenceLength += event.delta.length;
+    }
+    // Observed fragments are evidence only; they are never final turns or executable commands.
+    if (!native('transcriptEvidence',role,event.delta,event.start_ms,event.end_ms,run.id)
+        && role === 'user') invalidateEvidence(run);
+  }
+  function codexTranscript(run, role, event) {
+    const item = event.item;
+    const expectedType = role === 'user' ? 'input_transcript' : 'output_transcript';
+    if (!item || item.type !== expectedType || typeof item.text !== 'string') {
+      if (role === 'user') invalidateEvidence(run);
+      return;
+    }
+    // Observed Codex WebRTC events carry one fragment in item.text, not a replacement transcript.
+    // turn.delta and turn.done duplicate this stream and never establish an authorization boundary here.
+    if (role === 'user') {
+      run.userText = text(run.userText + text(item.text));
+      displayTranscript(ui.user,run.userText);
+    } else {
+      run.assistantText = text(run.assistantText + text(item.text));
+      displayTranscript(ui.assistant,run.assistantText);
+    }
+    transcriptEvidence(run,role,{delta:item.text,start_ms:event.start_ms,end_ms:event.end_ms});
+  }
+  function receive(run, raw) {
+    if (current !== run || run.stopped) return;
+    // A dropped or unreadable packet could contain a corrective user fragment.
+    if (typeof raw !== 'string' || raw.length > MAX_EVENT) { invalidateEvidence(run); return; }
+    let event;
+    try { event = JSON.parse(raw); } catch (_) { invalidateEvidence(run); return; }
+    if (!event || typeof event.type !== 'string') { invalidateEvidence(run); return; }
+    if (event.type === 'session.closed') { cleanup(run); return; }
+    if (!live(run)) return;
+    if (event.type === 'session.started') {
+      run.sessionStarted = true;
+      maybeReady(run);
+    } else if (event.type === 'error') {
+      fail(run, event.error && event.error.code === 'responses_validation_failed'
+        ? '家居查询工具配置不可用，请检查语音服务设置。' : '语音服务返回错误，请稍后重试。');
+    } else if (run.backend === 'codex' && event.type === 'input_transcript.added') {
+      codexTranscript(run,'user',event);
+    } else if (run.backend === 'codex' && event.type === 'output_transcript.added') {
+      codexTranscript(run,'assistant',event);
+    } else if (run.backend !== 'codex' && event.type === 'session.input_transcript.delta') {
+      run.userText = text(run.userText + text(event.delta));
+      displayTranscript(ui.user, run.userText);
+      transcriptEvidence(run,'user',event);
+      // GPT-Live has no final-user-turn event. A fragment never authorizes a device operation.
+    } else if (run.backend !== 'codex' && event.type === 'session.output_transcript.delta') {
+      run.assistantText = text(run.assistantText + text(event.delta));
+      displayTranscript(ui.assistant, run.assistantText);
+      transcriptEvidence(run,'assistant',event);
+    } else if (event.type === 'response.event' && event.event && typeof event.event.type === 'string') {
+      // Codex owns its tool loop through app-server. This page must never answer it a second time.
+      if (run.backend === 'codex') return;
+      if (!run.ready) {
+        if (run.pendingEvents.length >= 32) fail(run, '语音连接尚未就绪，请重新开始。');
+        else run.pendingEvents.push(raw);
+        return;
+      }
+      const inner = event.event;
+      if (inner.type === 'response.created') responseFor(run, event, inner);
+      else if (inner.type === 'response.output_item.done') receiveCall(run, event, inner);
+      else if (inner.type === 'response.completed') {
+        const response = responseFor(run, event, inner);
+        if (response) { response.completed = true; maybeContinue(run, response); }
+      } else if (inner.type === 'response.failed' || inner.type === 'response.incomplete') {
+        fail(run, '这次查询未能完成，请重新开始。');
+      }
+    }
+  }
+  async function gather(run) {
+    if (!live(run) || run.pc.iceGatheringState === 'complete') return;
+    await new Promise(resolve => {
+      const pc = run.pc;
+      let completed = false;
+      const finish = () => {
+        if (completed) return;
+        completed = true;
+        clearTimeout(timeout); run.timers.delete(timeout);
+        pc.removeEventListener('icegatheringstatechange', changed);
+        resolve();
+      };
+      const changed = () => { if (!live(run) || pc.iceGatheringState === 'complete') finish(); };
+      const timeout = timer(run, finish, 3000);
+      run.finishGathering = finish;
+      pc.addEventListener('icegatheringstatechange', changed);
+      changed();
+    });
+  }
+  async function start() {
+    if (current) return current.id;
+    if (document.hidden) return '';
+    const run = {id:'voice_' + Date.now().toString(36) + '_' + (++sequence),backend:'live',readOnly:false,stopped:false,closing:false,nativeClosed:false,ready:false,sessionStarted:false,muted:false,pc:null,dc:null,stream:null,remoteStreams:new Set(),remoteTracks:new Set(),timers:new Set(),calls:new Map(),responses:new Map(),delegations:new Map(),pendingEvents:[],context:'',userText:'',assistantText:'',evidenceInvalid:false,userEvidenceStart:-1,userEvidenceEnd:-1,userEvidenceLength:0,connectTimeout:null,finishGathering:null};
+    current = run;
+    controls(true);
+    ui.muteLabel.textContent = '静音'; ui.mute.setAttribute('aria-pressed','false');
+    ui.user.textContent = '正在准备麦克风…'; ui.user.classList.add('placeholder');
+    ui.assistant.textContent = '连接后就可以开始对话。'; ui.assistant.classList.add('placeholder');
+    ui.hint.textContent = '例如：“室内温度多少？”';
+    state(run, 'connecting', '正在连接', '正在为你准备语音对话。', '连接 ChatGPT 中');
+    try {
+      if (!window.HomeVoice || typeof window.HomeVoice.createSession !== 'function') {
+        fail(run, '请先在控制中心配置语音服务。'); return run.id;
+      }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.RTCPeerConnection) {
+        fail(run, '当前系统 WebView 不支持实时语音，请更新后重试。'); return run.id;
+      }
+      const pc = new RTCPeerConnection(); run.pc = pc;
+      pc.addEventListener('connectionstatechange', () => {
+        if (!live(run)) return;
+        if (['failed','closed'].includes(pc.connectionState)) fail(run, '语音连接已中断，请重试。');
+        else if (pc.connectionState === 'disconnected') {
+          run.ready = false;
+          state(run, 'connecting', '连接暂时中断', '正在等待网络恢复。', '重新连接中');
+          if (!run.disconnectTimeout) run.disconnectTimeout = timer(run, () => {
+            run.disconnectTimeout = null;
+            if (live(run) && pc.connectionState !== 'connected') fail(run, '网络连接已中断，请重试。');
+          }, 5000);
+        } else if (pc.connectionState === 'connected') {
+          if (run.disconnectTimeout) { clearTimeout(run.disconnectTimeout); run.timers.delete(run.disconnectTimeout); run.disconnectTimeout = null; }
+          maybeReady(run);
+        }
+      });
+      pc.addEventListener('track', event => {
+        if (!live(run)) { try { event.track.stop(); } catch (_) {} return; }
+        if (event.track.kind && event.track.kind !== 'audio') { try { event.track.stop(); } catch (_) {} return; }
+        run.remoteTracks.add(event.track);
+        const stream = event.streams && event.streams[0] ? event.streams[0] : new MediaStream([event.track]);
+        run.remoteStreams.add(stream); ui.audio.srcObject = stream;
+        Promise.resolve(ui.audio.play()).catch(() => { if (live(run)) ui.play.hidden = false; });
+      });
+      const dc = pc.createDataChannel('oai-events'); run.dc = dc;
+      dc.addEventListener('open', () => maybeReady(run));
+      dc.addEventListener('message', event => receive(run, event.data));
+      dc.addEventListener('close', () => { if (live(run)) fail(run, '语音连接已关闭，请重试。'); });
+      dc.addEventListener('error', () => { if (live(run)) fail(run, '语音连接发生错误，请重试。'); });
+      run.connectTimeout = timer(run, () => fail(run, '语音服务连接超时，请检查网络和语音设置。'), 35000);
+      const stream = await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});
+      if (!live(run)) { releaseStream(stream); return run.id; }
+      run.stream = stream;
+      for (const track of stream.getAudioTracks()) {
+        track.enabled = !run.muted;
+        track.addEventListener('ended', () => { if (live(run)) fail(run, '麦克风已停止，请重新开始。'); });
+        pc.addTrack(track,stream);
+      }
+      if (!stream.getAudioTracks().length) { fail(run, '无法使用麦克风，请检查权限。'); return run.id; }
+      const offer = await pc.createOffer(); if (!live(run)) return run.id;
+      await pc.setLocalDescription(offer); if (!live(run)) return run.id;
+      await gather(run); if (!live(run)) return run.id;
+      const sdp = pc.localDescription && pc.localDescription.sdp;
+      if (!sdp || sdp.length > 65536) { fail(run, '无法准备语音连接，请重试。'); return run.id; }
+      if (!native('createSession',sdp,run.id)) fail(run, '请先在控制中心配置语音服务。');
+    } catch (error) {
+      const message = error && error.name === 'NotAllowedError' ? '请允许麦克风权限后重试。'
+        : error && error.name === 'NotFoundError' ? '没有找到可用的麦克风。'
+        : error && error.name === 'NotReadableError' ? '麦克风暂时被占用，请稍后重试。'
+        : '无法启动语音连接，请重试。';
+      fail(run, message);
+    }
+    return run.id;
+  }
+  async function onSession(result) {
+    const run = current;
+    if (!run || !live(run) || !result || result.requestId !== run.id || run.answerApplied) return false;
+    if (!validId(result.sessionId) || typeof result.answerSdp !== 'string'
+        || !result.answerSdp.trim() || result.answerSdp.length > 65536
+        || result.protocol !== undefined && result.protocol !== 'live'
+        || result.backend !== undefined && !['live','codex'].includes(result.backend)
+        || result.readOnly !== undefined && typeof result.readOnly !== 'boolean') {
+      fail(run, '语音服务返回的连接信息无效。'); return false;
+    }
+    run.backend = result.backend || 'live';
+    // Codex control requires an explicit server-granted false flag; omission stays read-only.
+    run.readOnly = result.readOnly === true || run.backend === 'codex' && result.readOnly !== false;
+    if (run.backend === 'codex') run.context = '';
+    showModeHint(run);
+    run.answerApplied = true; run.sessionId = result.sessionId;
+    try {
+      await run.pc.setRemoteDescription({type:'answer',sdp:result.answerSdp});
+      if (live(run)) maybeReady(run);
+      return live(run);
+    } catch (_) { fail(run, '无法建立语音连接，请重试。'); return false; }
+  }
+  function onError(message, requestId) {
+    const run = current;
+    if (!run || run.id !== requestId || !live(run)) return false;
+    fail(run, text(message,240) || '请检查控制中心里的语音服务设置。');
+    return true;
+  }
+  function showSetupError(message) {
+    if (current) cleanup(current);
+    state(null,'error','暂时无法开始',text(message,240) || '请先在控制中心配置语音服务。','尚未连接');
+    controls(false);
+  }
+  function appendContext(value) {
+    const run = current;
+    if (!run || !live(run) || run.backend === 'codex' || typeof value !== 'string' || !value.trim()) return false;
+    const content = value.slice(0,16000);
+    if (!run.ready) { run.context = content; return true; }
+    return send(run,{type:'session.thinking.append',delegation_id:null,content});
+  }
+  function stop(immediate = false) {
+    const run = current;
+    if (!run || run.stopped) return;
+    if (run.closing) { if (immediate) cleanup(run); return; }
+    const canClose = run.ready && run.dc && run.dc.readyState === 'open';
+    run.closing = true; run.ready = false;
+    // Stop capture and playback immediately; only the data channel remains briefly for finalization.
+    releaseMedia(run);
+    clearTimers(run);
+    if (run.finishGathering) run.finishGathering();
+    controls(false,true);
+    state(run,'closing','正在结束','麦克风已关闭。','正在关闭连接');
+    if (!immediate && canClose && run.backend !== 'codex') {
+      try {
+        run.dc.send(JSON.stringify({type:'session.close',event_id:'home_close_' + run.id}));
+        timer(run, () => cleanup(run,'idle','对话已结束','连接已关闭。需要时，可以再次开始。'), 1500);
+        return;
+      } catch (_) {}
+    }
+    cleanup(run);
+  }
+  function toggleMute() {
+    const run = current;
+    if (!run || !live(run)) return;
+    run.muted = !run.muted;
+    if (run.stream) for (const track of run.stream.getAudioTracks()) track.enabled = !run.muted;
+    ui.mute.setAttribute('aria-pressed',String(run.muted));
+    ui.muteLabel.textContent = run.muted ? '取消静音' : '静音';
+    if (run.ready) maybeReady(run);
+  }
+  ui.start.addEventListener('click',start);
+  ui.end.addEventListener('click',() => stop());
+  ui.mute.addEventListener('click',toggleMute);
+  ui.play.addEventListener('click',() => {
+    const run = current;
+    if (!run || !live(run)) return;
+    Promise.resolve(ui.audio.play()).then(() => { if (live(run)) ui.play.hidden = true; }).catch(() => {});
+  });
+  $('close').addEventListener('click',() => { stop(true); native('closeRequested'); });
+  document.addEventListener('visibilitychange',() => { if (document.hidden) stop(true); });
+  window.addEventListener('pagehide',() => stop(true));
+  window.homeVoice = Object.freeze({start,stop,onSession,onError,showSetupError,appendContext,onToolResult});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+title = "home_pad secret scanning"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Public SHA256 of the fixed wake-word tokens.txt asset"
+targetRules = ["generic-api-key"]
+regexTarget = "match"
+regexes = ['''72316508d9119696145abc6f1f8cdc46287535c34e5ce7e595f845cb1499cf2e''']

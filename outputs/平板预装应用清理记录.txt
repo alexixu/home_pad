@@ -1,0 +1,66 @@
+小米平板 5 Pro 预装应用清理记录
+设备：elish / HyperOS OS1.0.2.0.TKYCNXM / Android 13
+范围：小米预装的非必要应用；保留用户自行安装的应用与系统依赖。
+
+结果：17 项已为机主用户卸载，3 项卸载受限后已停用。
+
+已卸载：
+1. 系统广告组件 — com.miui.systemAdSolution
+2. 小米统计分析 — com.miui.analytics
+3. 快应用 — com.miui.hybrid
+4. 第三方应用辅助 — com.miui.thirdappassistant
+5. 游戏服务 — com.xiaomi.gamecenter.sdk.service
+6. 小米音乐 — com.miui.player
+7. 小米视频 — com.miui.video
+8. 负一屏/智能助理 — com.miui.personalassistant
+9. 全局搜索 — com.android.quicksearchbox
+10. 黄页 — com.miui.yellowpage
+11. 服务与反馈 — com.miui.miservice
+12. 预装 WPS Office — cn.wps.moffice_eng
+13. 预装 WPS 小米版 — cn.wps.moffice_eng.xiaomi.lite
+14. 小米钱包 — com.mipay.wallet
+15. 米家 — com.xiaomi.smarthome
+16. 小米换机 — com.miui.huanji
+17. 小米云盘 — com.miui.newmidrive
+
+卸载被小米限制拦截，已停用：
+18. 游戏中心 — com.xiaomi.gamecenter
+19. 多看阅读 — com.duokan.reader
+20. 清理大师 — com.miui.cleanmaster
+这三项卸载均返回 Failure [-1000]，之后成功设为 disabled-user。
+验证时均在停用清单，且没有同名运行进程；安装文件仍保留，不能称为已卸载。
+
+保留范围：
+用户安装的小红书；桌面、设置、系统界面、安全中心、权限管理、安装器、USB 安装提示组件、WebView、输入法、小米账号、查找设备及用于解锁申请的小米社区。
+浏览器、应用商店、相册、文件管理、便签、计算器、天气、录音、邮件等基础工具也保留。
+小米创作尚未确认依赖，本轮保留。
+
+数据与恢复：
+卸载使用 pm uninstall -k --user 0，按 -k 参数保留应用数据；停用不清除数据。
+没有清空照片、文档或其他个人文件。保留数据不等于已备份全部应用私有数据。
+这是当前用户级卸载；系统分区中的预装底包不被删除。
+20 项均已保存完整 APK 并计算 SHA256，备份共 895019993 字节，约 895 MB。
+备份位置：本任务 work/tablet-debloat/apk-backups。请保留完整任务目录。
+同目录的“恢复已卸载预装应用.command”可尝试恢复本次卸载及停用的应用；优先重新启用或 install-existing，必要时使用已校验的 APK 备份。
+恢复脚本已通过语法检查，尚未整批实际执行恢复。
+
+验证与边界：
+17 项已不在机主用户的安装清单；3 项出现在停用清单。
+已实际打开设置并返回桌面，核对截图；ADB 命令和截屏正常。
+核心组件和当前搜狗输入法仍安装、启用，小红书仍安装、启用。
+scrcpy 熄屏控制进程仍运行，SurfaceFlinger 显示实体显示器熄屏、虚拟显示器开启。
+本轮没有重启平板，没有执行 BL 解锁或 Root，未验证系统升级后的状态。
+
+参考核验：
+https://github.com/Universal-Debloater-Alliance/universal-android-debloater-next-generation/blob/main/resources/assets/uad_lists.json
+社区清单仅用于辅助识别，不能替代本机验证。
+
+卸载拦截原因的本机核验：
+只读提取本机 /system_ext/framework/miui-services.jar 后，确认 PackageManagerServiceImpl.protectAppFromDeleting 中存在受保护 data-app 检查。
+当非系统应用命中 PreloadedAppPolicy.isProtectedDataApp，调用方又不是 root、system 或允许的卸载来源时，该分支返回 -1000。
+本机当时日志直接匹配此分支：
+10-30 12:47:33.797 PKMSImpl: MIUILOG- can't uninstall pkg : com.xiaomi.gamecenter callingUid : 2000
+10-30 12:47:34.205 PKMSImpl: MIUILOG- can't uninstall pkg : com.duokan.reader callingUid : 2000
+10-30 12:47:35.436 PKMSImpl: MIUILOG- can't uninstall pkg : com.miui.cleanmaster callingUid : 2000
+UID 2000 是本次 ADB shell 调用身份。受保护预装身份独立于 Android SYSTEM 标志，不能据此认定这些应用是系统运行必需。
+停用使用另一条包管理接口，已实测允许。代码存在受信任卸载来源例外；这些例外是否能通过系统界面用于本机三个应用，尚未验证。

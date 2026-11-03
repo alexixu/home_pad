@@ -1,0 +1,4 @@
+interface:
+  display_name: "home_pad 安装助手"
+  short_description: "自动检查小米平板环境，构建升级家庭面板，并只读验证 Home Assistant 状态"
+  default_prompt: "使用 $home-pad-setup 检查当前平板，安装或升级 home_pad，只查询设备状态并保留现有供电状态。"
