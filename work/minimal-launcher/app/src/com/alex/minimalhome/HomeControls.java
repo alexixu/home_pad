@@ -260,6 +260,7 @@ public final class HomeControls {
                     .setNegativeButton("取消", null).create();
             attachControlDialog(dialog, null, null);
             dialog.show();
+            HomeStyle.dialog(dialog);
             return;
         }
         final boolean expectedOn = displayed.on;
@@ -272,6 +273,7 @@ public final class HomeControls {
                     .setPositiveButton("知道了", null).create();
             attachControlDialog(dialog, null, null);
             dialog.show();
+            HomeStyle.dialog(dialog);
             return;
         }
         String action = targetOn ? "开启" : "关闭";
@@ -298,6 +300,7 @@ public final class HomeControls {
             updateControlDialog();
         });
         dialog.show();
+        HomeStyle.dialog(dialog);
     }
 
     private void attachControlDialog(AlertDialog dialog, Config expectedConfig, Boolean expectedOn) {
@@ -920,6 +923,7 @@ public final class HomeControls {
             }
         }));
         dialog.show();
+        HomeStyle.dialog(dialog);
     }
 
     private void acceptSave(int requestGeneration, boolean success) {

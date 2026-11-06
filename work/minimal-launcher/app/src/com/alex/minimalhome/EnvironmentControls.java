@@ -249,6 +249,7 @@ public final class EnvironmentControls {
             refresh();
         }));
         dialog.show();
+        HomeStyle.dialog(dialog);
     }
 
     private EditText field(LinearLayout parent, String label, String hint, String value) {

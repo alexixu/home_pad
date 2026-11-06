@@ -130,7 +130,7 @@ public final class MainActivity extends Activity {
         controlCenter.hide();
         homeDevices.setListener(() -> {
             if (controlCenter != null) controlCenter.refreshDevices();
-            if (dashboard != null) dashboard.setLightSummary(homeDevices.snapshot().lightSummary());
+            if (dashboard != null) dashboard.setDeviceCatalog(homeDevices.snapshot().toJson(""));
         });
         homeControls.setStateListener(controlState -> {
             dashboard.setState(controlState);
@@ -401,44 +401,43 @@ public final class MainActivity extends Activity {
                         + "\n\n记录时间来自 Home Assistant，不代表传感器实际采样时刻。")
                 .setPositiveButton("关闭", null).create();
         overlayDialog.show();
+        HomeStyle.dialog(overlayDialog);
     }
 
     private void showHomeSettings() {
         if (!controlsOpen) return;
         dismissOverlays();
-        overlayDialog = new AlertDialog.Builder(this)
-                .setTitle("连接与桌面设置")
-                .setItems(new String[]{"家居连接设置", "启动插座服务", "选择默认桌面", "刷新全部状态", "温湿度与天气来源", "ChatGPT 语音连接"}, (dialog, which) -> {
-                    if (which == 0) {
-                        homeControls.showSettingsDialog();
-                        return;
-                    }
-                    if (which == 1) {
-                        startTabletHomeService();
-                        return;
-                    }
-                    if (which == 3) {
-                        homeControls.refresh();
-                        environmentControls.refresh();
-                        return;
-                    }
-                    if (which == 4) {
-                        environmentControls.showSettingsDialog();
-                        return;
-                    }
-                    if (which == 5) {
-                        voiceControls.showSettings();
-                        return;
-                    }
-                    try {
-                        startActivity(new Intent(Settings.ACTION_HOME_SETTINGS));
-                    } catch (ActivityNotFoundException e) {
-                        startActivity(new Intent(Settings.ACTION_SETTINGS));
-                    }
-                })
-                .setNegativeButton("取消", null)
-                .create();
+        LinearLayout menu = new LinearLayout(this);
+        menu.setOrientation(LinearLayout.VERTICAL);
+        menu.setPadding(dp(20), dp(4), dp(20), dp(12));
+        String[] names = {"家居连接", "温湿度与天气", "ChatGPT 语音", "默认桌面", "刷新全部状态", "本地服务"};
+        String[] notes = {"管理 Home Assistant 连接", "选择室内传感器和室外天气来源", "配对语音服务，设置查询与控制权限", "选择平板按 Home 键后打开的应用", "更新设备与环境数据", "仅在本地服务未运行时手动启动"};
+        for (int index = 0; index < names.length; index++) {
+            final int selected = index;
+            LinearLayout row = HomeStyle.settingsRow(this, names[index], notes[index], () -> {
+                if (overlayDialog != null) overlayDialog.dismiss();
+                overlayDialog = null;
+                switch (selected) {
+                    case 0: homeControls.showSettingsDialog(); return;
+                    case 1: environmentControls.showSettingsDialog(); return;
+                    case 2: voiceControls.showSettings(); return;
+                    case 4: homeControls.refresh(); environmentControls.refresh(); homeDevices.refresh(ignored -> {}); return;
+                    case 5: startTabletHomeService(); return;
+                    default:
+                        try { startActivity(new Intent(Settings.ACTION_HOME_SETTINGS)); }
+                        catch (ActivityNotFoundException e) { startActivity(new Intent(Settings.ACTION_SETTINGS)); }
+                }
+            });
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            if (index > 0) params.topMargin = dp(8);
+            menu.addView(row, params);
+        }
+        android.widget.ScrollView settingsScroll = new android.widget.ScrollView(this);
+        settingsScroll.setVerticalScrollBarEnabled(false); settingsScroll.addView(menu);
+        overlayDialog = new AlertDialog.Builder(this).setTitle("连接与桌面")
+                .setView(settingsScroll).setNegativeButton("返回", null).create();
         overlayDialog.show();
+        HomeStyle.dialog(overlayDialog);
     }
 
     private void startTabletHomeService() {
@@ -494,9 +493,10 @@ public final class MainActivity extends Activity {
             dashboard.setLayoutParams(dashboardFrame);
         }
         FrameLayout.LayoutParams controlsFrame = (FrameLayout.LayoutParams) controlCenter.getLayoutParams();
+        int controlsBottom = Math.max(safeBottom, imeBottom);
         if (controlsFrame.leftMargin != safeLeft || controlsFrame.topMargin != safeTop
-                || controlsFrame.rightMargin != safeRight || controlsFrame.bottomMargin != safeBottom) {
-            controlsFrame.setMargins(safeLeft, safeTop, safeRight, safeBottom);
+                || controlsFrame.rightMargin != safeRight || controlsFrame.bottomMargin != controlsBottom) {
+            controlsFrame.setMargins(safeLeft, safeTop, safeRight, controlsBottom);
             controlCenter.setLayoutParams(controlsFrame);
         }
         int top = active ? Math.max(dp(12), Math.min(dp(48), available / 12))
@@ -590,7 +590,7 @@ public final class MainActivity extends Activity {
         gap.setVisibility(searching ? View.VISIBLE : View.GONE);
         results.setVisibility(searching && !matches.isEmpty() ? View.VISIBLE : View.GONE);
         status.setVisibility(searching && matches.isEmpty() ? View.VISIBLE : View.GONE);
-        status.setText(indexLoading ? "正在读取应用…" : "未找到应用");
+        status.setText(indexLoading ? "正在读取应用…" : "没有找到应用，试试名称或拼音首字母");
         results.setSelection(0);
         updateLayout();
     }

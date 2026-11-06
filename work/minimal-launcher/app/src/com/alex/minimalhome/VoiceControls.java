@@ -113,24 +113,27 @@ public final class VoiceControls {
         View content;
         if (sessionConfig == null) {
             TextView setup = new TextView(activity);
-            setup.setText("连接 ChatGPT 语音后，就可以自然地询问家中状态。\n\n请在语音设置中连接已配置的服务。");
+            setup.setText("连接 ChatGPT 语音后，就可以用自然语言查询和操作已接入的家居。\n\n请在语音设置中连接已配置的服务。");
             setup.setTextSize(18); setup.setTextColor(0xFF705537); setup.setPadding(dp(28), dp(24), dp(28), dp(24));
             content = setup;
         } else {
             browser = createBrowser(ticket);
             content = browser;
         }
-        AlertDialog next = new AlertDialog.Builder(activity).setTitle("ChatGPT 语音")
-                .setView(content).setNegativeButton("返回主页", (ignored, which) -> dismiss())
-                .setNeutralButton("语音设置", (ignored, which) -> { dismiss(); showSettings(); }).create();
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity).setView(content);
+        if (browser == null) builder.setTitle("ChatGPT 语音")
+                .setNegativeButton("返回首页", (ignored, which) -> dismiss())
+                .setNeutralButton("语音设置", (ignored, which) -> { dismiss(); showSettings(); });
+        AlertDialog next = builder.create();
         dialog = next;
         next.setOnDismissListener(ignored -> { if (dialog == next) dismiss(); });
         next.show();
-        GradientDrawable paper = new GradientDrawable(); paper.setColor(0xFFFFF8EC); paper.setCornerRadius(dp(24));
+        HomeStyle.dialog(next);
+        GradientDrawable paper = new GradientDrawable(); paper.setColor(HomeStyle.SURFACE); paper.setCornerRadius(dp(24));
         if (next.getWindow() != null) {
             next.getWindow().setBackgroundDrawable(paper);
-            if (browser != null) next.getWindow().setLayout(Math.min(dp(760), activity.getResources().getDisplayMetrics().widthPixels - dp(40)),
-                    Math.min(dp(680), activity.getResources().getDisplayMetrics().heightPixels - dp(60)));
+            if (browser != null) next.getWindow().setLayout(Math.min(dp(1000), activity.getResources().getDisplayMetrics().widthPixels - dp(48)),
+                    Math.min(dp(760), activity.getResources().getDisplayMetrics().heightPixels - dp(48)));
         }
         if (browser != null) {
             browser.loadUrl(ORIGIN + "/voice/voice.html");
@@ -139,7 +142,7 @@ public final class VoiceControls {
 
     private WebView createBrowser(int ticket) {
         WebView view = new WebView(activity);
-        view.setBackgroundColor(0xFFFFF8EC);
+        view.setBackgroundColor(HomeStyle.SURFACE);
         WebSettings settings = view.getSettings();
         settings.setJavaScriptEnabled(true); settings.setDomStorageEnabled(false);
         settings.setAllowFileAccess(false); settings.setAllowContentAccess(false);
@@ -266,6 +269,9 @@ public final class VoiceControls {
                 if (generation != ticket || (requestId != null && !requestId.equals(id))) return;
                 endServerSession(); cancelPending(); if (handshake != null) handshake.cancel(); handshake = null; requestId = null;
             });
+        }
+        @JavascriptInterface public void settingsRequested() {
+            main.post(() -> { if (current(ticket)) { dismiss(); showSettings(); } });
         }
         @JavascriptInterface public void closeRequested() { main.post(() -> { if (generation == ticket) dismiss(); }); }
         @JavascriptInterface public void notifyState(String state, String message, String id) {
@@ -568,6 +574,7 @@ public final class VoiceControls {
                 .setPositiveButton("保存", null).setNeutralButton("导入配对文件", null).setNegativeButton("取消", null).create();
         settingsDialog = next; next.setOnDismissListener(ignored -> { if (settingsDialog == next) settingsDialog = null; });
         next.show();
+        HomeStyle.dialog(next);
         next.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             try {
                 String value = token.getText().toString();
@@ -585,7 +592,11 @@ public final class VoiceControls {
         });
     }
     private EditText input(LinearLayout parent, String hint, String value, boolean password) {
-        EditText edit = new EditText(activity); edit.setSingleLine(true); edit.setHint(hint); edit.setText(value);
+        TextView label = new TextView(activity); label.setText(hint); label.setTextColor(HomeStyle.MUTED);
+        label.setTextSize(13); label.setPadding(0, dp(14), 0, dp(4)); parent.addView(label);
+        EditText edit = new EditText(activity); edit.setSingleLine(true); edit.setHint(password ? "输入后保存" : hint); edit.setText(value);
+        edit.setTextSize(15); edit.setTextColor(HomeStyle.INK); edit.setHintTextColor(HomeStyle.MUTED);
+        edit.setPadding(dp(12), dp(12), dp(12), dp(12)); edit.setBackground(HomeStyle.surface(activity, HomeStyle.PAPER, 10));
         edit.setInputType(InputType.TYPE_CLASS_TEXT | (password ? InputType.TYPE_TEXT_VARIATION_PASSWORD : InputType.TYPE_TEXT_VARIATION_URI));
         parent.addView(edit, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)); return edit;
     }

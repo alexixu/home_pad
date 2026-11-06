@@ -18,6 +18,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -32,6 +33,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -49,29 +52,25 @@ public final class ControlCenter extends FrameLayout {
     private final EnvironmentControls environmentControls;
     private final ScrollView scroll;
     private final LinearLayout content;
-    private final LinearLayout columns;
-    private final LinearLayout deviceCard;
     private final LinearLayout environmentCard;
-    private final TextView deviceName;
-    private final TextView deviceStatus;
     private final TextView indoorReading;
     private final TextView indoorSource;
     private final TextView weatherReading;
     private final TextView weatherSource;
-    private final Button powerAction;
-    private final Button deviceRefresh;
     private final Button environmentRefresh;
     private final LinearLayout allDevicesBody;
     private final TextView allDevicesSummary;
     private final TextView allDevicesFeedback;
     private final Button allDevicesRefresh;
     private final EditText deviceSearch;
+    private final Button deviceSearchClear;
     private AlertDialog actionDialog;
     private AtomicBoolean touchAuthorization;
     private boolean touchBusy;
     private boolean catalogRefreshing;
     private String renderedCatalog = "";
     private boolean wide;
+    private final Set<String> expandedDevices = new HashSet<>();
 
     public ControlCenter(Activity activity, HomeControls homeControls, HomeDevices homeDevices,
             EnvironmentControls environmentControls, Runnable close,
@@ -87,55 +86,37 @@ public final class ControlCenter extends FrameLayout {
         setDescendantFocusability(ViewGroup.FOCUS_BEFORE_DESCENDANTS);
         setVisibility(GONE);
 
+        LinearLayout page = column();
+        addView(page, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        LinearLayout header = row();
+        header.setPadding(dp(24), dp(18), dp(24), dp(16));
+        LinearLayout heading = column();
+        TextView title = text("控制中心", 27, INK, true);
+        markHeading(title);
+        heading.addView(title);
+        TextView intro = text("按房间操作家中设备", 13, MUTED, false);
+        intro.setPadding(0, dp(5), 0, 0);
+        heading.addView(intro);
+        header.addView(heading, new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1));
+        Button settings = button("设置", false, openHomeSettings);
+        settings.setContentDescription("连接与桌面设置");
+        header.addView(settings, new LinearLayout.LayoutParams(dp(76), LayoutParams.WRAP_CONTENT));
+        Button back = button("返回首页", false, () -> { hide(); close.run(); });
+        LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(dp(112), LayoutParams.WRAP_CONTENT);
+        backParams.leftMargin = dp(10);
+        header.addView(back, backParams);
+        page.addView(header, matchWrap());
+        View headerLine = new View(activity);
+        headerLine.setBackgroundColor(LINE);
+        page.addView(headerLine, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, dp(1)));
         scroll = new ScrollView(activity);
         scroll.setFillViewport(true);
         scroll.setClipToPadding(false);
         scroll.setVerticalScrollBarEnabled(false);
-        addView(scroll, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        page.addView(scroll, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1));
         content = column();
-        content.setPadding(dp(28), dp(28), dp(28), dp(36));
+        content.setPadding(dp(24), dp(20), dp(24), dp(32));
         scroll.addView(content, new ScrollView.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-
-        LinearLayout header = row();
-        LinearLayout heading = column();
-        heading.addView(text("HOME", 11, MUTED, true));
-        TextView title = text("控制中心", 30, INK, true);
-        title.setPadding(0, dp(5), 0, 0);
-        markHeading(title);
-        heading.addView(title);
-        header.addView(heading, new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1));
-        Button back = button("返回首页", false, () -> { hide(); close.run(); });
-        LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(dp(112), LayoutParams.WRAP_CONTENT);
-        backParams.leftMargin = dp(12);
-        header.addView(back, backParams);
-        content.addView(header, matchWrap());
-        TextView intro = text("查看详情，或在这里操作设备。", 14, MUTED, false);
-        intro.setPadding(0, dp(13), 0, dp(26));
-        content.addView(intro, matchWrap());
-
-        columns = column();
-        content.addView(columns, matchWrap());
-
-        deviceCard = card();
-        deviceCard.addView(sectionLabel("常用设备"), matchWrap());
-        deviceName = text("插座", 25, INK, true);
-        deviceName.setPadding(0, dp(14), 0, dp(8));
-        deviceCard.addView(deviceName, matchWrap());
-        deviceStatus = text("等待连接", 17, MUTED, false);
-        deviceCard.addView(deviceStatus, matchWrap());
-        TextView stateNote = text("状态由 Home Assistant 报告", 12, MUTED, false);
-        stateNote.setPadding(0, dp(7), 0, dp(22));
-        deviceCard.addView(stateNote, matchWrap());
-        powerAction = button("电源操作…", true, () -> {
-            cancelTouchAction();
-            homeControls.showControlDialog();
-        });
-        deviceCard.addView(powerAction, matchWrap());
-        TextView confirmNote = text("操作前需再次确认。", 12, MUTED, false);
-        confirmNote.setPadding(0, dp(8), 0, dp(14));
-        deviceCard.addView(confirmNote, matchWrap());
-        deviceRefresh = button("刷新设备状态", false, homeControls::refresh);
-        deviceCard.addView(deviceRefresh, matchWrap());
 
         environmentCard = card();
         environmentCard.addView(sectionLabel("环境"), matchWrap());
@@ -165,15 +146,10 @@ public final class ControlCenter extends FrameLayout {
         sourceParams.topMargin = dp(8);
         environmentCard.addView(sourceSettings, sourceParams);
 
-        columns.addView(deviceCard, matchWrap());
-        LinearLayout.LayoutParams envParams = matchWrap();
-        envParams.topMargin = dp(16);
-        columns.addView(environmentCard, envParams);
-
         LinearLayout allDevices = card();
         LinearLayout catalogHeader = row();
         LinearLayout catalogHeading = column();
-        catalogHeading.addView(sectionLabel("全部设备"), matchWrap());
+        catalogHeading.addView(sectionLabel("家居设备"), matchWrap());
         allDevicesSummary = text("等待设备目录", 14, MUTED, false);
         allDevicesSummary.setPadding(0, dp(8), 0, 0);
         catalogHeading.addView(allDevicesSummary, matchWrap());
@@ -189,41 +165,50 @@ public final class ControlCenter extends FrameLayout {
         deviceSearch.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         deviceSearch.setTextColor(INK);
         deviceSearch.setHintTextColor(MUTED);
-        deviceSearch.setHint("查找设备、房间或功能");
-        deviceSearch.setContentDescription("查找设备、房间或功能");
+        deviceSearch.setHint("搜索设备或房间");
+        deviceSearch.setContentDescription("搜索设备或房间");
         deviceSearch.setInputType(InputType.TYPE_CLASS_TEXT);
+        deviceSearch.setImeOptions(EditorInfo.IME_ACTION_SEARCH | EditorInfo.IME_FLAG_NO_EXTRACT_UI);
         deviceSearch.setFilters(new InputFilter[]{new InputFilter.LengthFilter(64)});
         deviceSearch.setPadding(dp(14), dp(12), dp(14), dp(12));
         deviceSearch.setBackground(shape(PAPER, LINE, 12));
         LinearLayout.LayoutParams searchParams = matchWrap();
         searchParams.topMargin = dp(18);
-        allDevices.addView(deviceSearch, searchParams);
-        allDevicesFeedback = text("选择设备的“操作”后，确认才会执行。", 12, MUTED, false);
+        LinearLayout searchRow = row();
+        searchRow.addView(deviceSearch, new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1));
+        deviceSearchClear = button("×", false, () -> deviceSearch.setText(""));
+        deviceSearchClear.setContentDescription("清空设备搜索");
+        deviceSearchClear.setVisibility(GONE);
+        LinearLayout.LayoutParams clearParams = new LinearLayout.LayoutParams(dp(50), dp(50));
+        clearParams.leftMargin = dp(8);
+        searchRow.addView(deviceSearchClear, clearParams);
+        allDevices.addView(searchRow, searchParams);
+        deviceSearch.setOnEditorActionListener((view, action, event) -> {
+            if (action != EditorInfo.IME_ACTION_SEARCH) return false;
+            InputMethodManager keyboard = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (keyboard != null) keyboard.hideSoftInputFromWindow(deviceSearch.getWindowToken(), 0);
+            deviceSearch.clearFocus(); requestFocus(); return true;
+        });
+        allDevicesFeedback = text("点按操作后确认执行", 12, MUTED, false);
         allDevicesFeedback.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         allDevicesFeedback.setPadding(0, dp(12), 0, dp(6));
         allDevices.addView(allDevicesFeedback, matchWrap());
         allDevicesBody = column();
         allDevices.addView(allDevicesBody, matchWrap());
         LinearLayout.LayoutParams catalogParams = matchWrap();
-        catalogParams.topMargin = dp(16);
         content.addView(allDevices, catalogParams);
         deviceSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+                deviceSearchClear.setVisibility(s.length() == 0 ? GONE : VISIBLE);
                 refreshDevices();
             }
             @Override public void afterTextChanged(Editable value) {}
         });
 
-        LinearLayout management = card();
-        management.addView(sectionLabel("设置"), matchWrap());
-        TextView settingsNote = text("家居连接、桌面与本地服务", 14, MUTED, false);
-        settingsNote.setPadding(0, dp(10), 0, dp(15));
-        management.addView(settingsNote, matchWrap());
-        management.addView(button("打开设置", false, openHomeSettings), matchWrap());
-        LinearLayout.LayoutParams managementParams = matchWrap();
-        managementParams.topMargin = dp(16);
-        content.addView(management, managementParams);
+        LinearLayout.LayoutParams environmentParams = matchWrap();
+        environmentParams.topMargin = dp(18);
+        content.addView(environmentCard, environmentParams);
 
         updateState(homeControls.getDashboardState(), environmentControls.getState());
     }
@@ -253,13 +238,6 @@ public final class ControlCenter extends FrameLayout {
 
     /** Main-thread snapshots only; this view registers no observers and performs no polling. */
     public void updateState(HomeControls.DashboardState device, EnvironmentControls.State environment) {
-        deviceName.setText(device == null ? "插座" : nonempty(device.title, "插座"));
-        deviceStatus.setText(device == null ? "等待连接" : nonempty(device.status, "状态未知"));
-        boolean canControl = device != null && device.configured && device.known
-                && device.canControl && device.networkAvailable && !device.busy && !touchBusy;
-        enabled(powerAction, canControl);
-        powerAction.setContentDescription(deviceName.getText() + "，电源操作，需再次确认");
-        enabled(deviceRefresh, device != null && !device.busy);
         refreshDevices();
         if (environment == null) {
             indoorReading.setText("— °C   /   — %");
@@ -288,7 +266,7 @@ public final class ControlCenter extends FrameLayout {
         boolean blocked = touchBusy || catalogRefreshing || (home != null && home.busy);
         enabled(allDevicesRefresh, !catalogRefreshing && !blocked);
         allDevicesRefresh.setText(catalogRefreshing ? "刷新中" : "刷新");
-        String signature = catalog.toString() + "|" + blocked;
+        String signature = catalog.toString() + "|" + blocked + "|" + wide + "|" + expandedDevices;
         if (signature.equals(renderedCatalog)) return;
         renderedCatalog = signature;
         allDevicesBody.removeAllViews();
@@ -309,7 +287,7 @@ public final class ControlCenter extends FrameLayout {
         allDevicesSummary.setText(count);
         if (truncated) addCatalogNote("部分功能已省略，请搜索设备或功能。");
         if (displayed == 0) {
-            addCatalogNote(filtered ? "没有找到匹配的设备或房间。" : "设备目录中暂时没有设备。");
+            addCatalogNote(filtered ? "没有匹配的设备，试试其他名称或清空搜索。" : "设备目录中暂时没有设备。");
             return;
         }
         Map<String, ArrayList<JSONObject>> rooms = new LinkedHashMap<>();
@@ -330,7 +308,28 @@ public final class ControlCenter extends FrameLayout {
             roomTitle.setPadding(0, dp(21), 0, dp(10));
             markHeading(roomTitle);
             allDevicesBody.addView(roomTitle, matchWrap());
-            for (JSONObject device : room.getValue()) addDevice(device, revision, blocked);
+            LinearLayout pair = null;
+            for (int index = 0; index < room.getValue().size(); index++) {
+                if (!wide) {
+                    LinearLayout.LayoutParams params = matchWrap();
+                    params.bottomMargin = dp(12);
+                    allDevicesBody.addView(deviceView(room.getValue().get(index), revision, blocked), params);
+                } else {
+                    if (index % 2 == 0) {
+                        pair = row(); pair.setGravity(Gravity.TOP);
+                        LinearLayout.LayoutParams params = matchWrap(); params.bottomMargin = dp(12);
+                        allDevicesBody.addView(pair, params);
+                    }
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1);
+                    if (index % 2 == 1) params.leftMargin = dp(12);
+                    pair.addView(deviceView(room.getValue().get(index), revision, blocked), params);
+                    if (index == room.getValue().size() - 1 && index % 2 == 0) {
+                        View spacer = new View(getContext());
+                        LinearLayout.LayoutParams space = new LinearLayout.LayoutParams(0, 1, 1); space.leftMargin = dp(12);
+                        pair.addView(spacer, space);
+                    }
+                }
+            }
         }
     }
 
@@ -342,7 +341,7 @@ public final class ControlCenter extends FrameLayout {
         homeDevices.refresh(result -> {
             catalogRefreshing = false;
             allDevicesFeedback.setText(result.optBoolean("ok", false)
-                    ? "设备状态已刷新。选择操作后，确认才会执行。"
+                    ? "设备状态已更新"
                     : errorMessage(result.optString("error", "request_failed")));
             refreshDevices();
         });
@@ -354,13 +353,20 @@ public final class ControlCenter extends FrameLayout {
         allDevicesBody.addView(view, matchWrap());
     }
 
-    private void addDevice(JSONObject device, String revision, boolean blocked) {
+    private LinearLayout deviceView(JSONObject device, String revision, boolean blocked) {
         LinearLayout box = column();
         box.setPadding(dp(17), dp(16), dp(17), dp(16));
         box.setBackground(shape(PAPER, LINE, 16));
         String name = nonempty(device.optString("name"), "家居设备");
         JSONArray entities = device.optJSONArray("entities");
         boolean available = device.optBoolean("available", false);
+        boolean powerOnly = "烤箱插座".equals(name);
+        JSONObject powerEntity = powerOnly ? mainPowerEntity(device) : null;
+        if (powerOnly) {
+            entities = new JSONArray();
+            if (powerEntity != null) entities.put(powerEntity);
+            available = available && powerEntity != null && entityAvailable(powerEntity);
+        }
         boolean controllable = false;
         if (entities != null) {
             for (int i = 0; i < entities.length(); i++) {
@@ -377,14 +383,43 @@ public final class ControlCenter extends FrameLayout {
         availability.setPadding(dp(12), 0, 0, 0);
         titleRow.addView(availability, new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
         box.addView(titleRow, matchWrap());
-        if (entities == null || entities.length() == 0) {
+        if (powerOnly) {
+            addPlugPowerButtons(box, device, powerEntity, revision, available && !blocked);
+        } else if (entities == null || entities.length() == 0) {
             TextView note = text(available ? "此设备暂未提供可查看的状态。" : "暂时无法获取此设备的状态。", 13, MUTED, false);
             note.setPadding(0, dp(10), 0, 0);
             box.addView(note, matchWrap());
         } else {
+            String deviceKey = device.optString("id", name);
+            boolean expanded = expandedDevices.contains(deviceKey) || !deviceSearch.getText().toString().trim().isEmpty();
+            int readOnlyShown = 0;
+            LinearLayout readings = row();
+            readings.setPadding(0, dp(14), 0, 0);
             for (int i = 0; i < entities.length(); i++) {
                 JSONObject entity = entities.optJSONObject(i);
                 if (entity == null) continue;
+                if ("cover".equals(entity.optString("domain", ""))) {
+                    addCoverButtons(box, device, entity, revision, available && !blocked);
+                    continue;
+                }
+                JSONArray entityActions = entity.optJSONArray("actions");
+                if ((entityActions == null || entityActions.length() == 0) && ++readOnlyShown > 2 && !expanded) {
+                    continue;
+                }
+                if (!controllable && readOnlyShown <= 2) {
+                    if (readings.getParent() == null) box.addView(readings, matchWrap());
+                    LinearLayout metric = column();
+                    String label = nonempty(entity.optString("name"), name);
+                    for (String suffix : new String[]{"温度", "湿度", "电量", "电池"}) {
+                        if (label.endsWith(suffix)) { label = suffix; break; }
+                    }
+                    metric.addView(text(label, 13, MUTED, false), matchWrap());
+                    TextView value = text(displayState(entity), 22, INK, false);
+                    value.setPadding(0, dp(5), 0, 0);
+                    metric.addView(value, matchWrap());
+                    readings.addView(metric, new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1));
+                    continue;
+                }
                 LinearLayout entityRow = row();
                 entityRow.setPadding(0, dp(14), 0, 0);
                 LinearLayout reading = column();
@@ -410,9 +445,117 @@ public final class ControlCenter extends FrameLayout {
                 box.addView(entityRow, matchWrap());
             }
         }
-        LinearLayout.LayoutParams params = matchWrap();
-        params.bottomMargin = dp(10);
-        allDevicesBody.addView(box, params);
+        if (!powerOnly && entities != null && entities.length() > 2) {
+            String key = device.optString("id", name);
+            // Only read-only rows are folded; all supported actions remain visible.
+            int readonlyCount = 0;
+            for (int i = 0; i < entities.length(); i++) {
+                JSONObject entry = entities.optJSONObject(i);
+                JSONArray actions = entry == null ? null : entry.optJSONArray("actions");
+                if (entry != null && (actions == null || actions.length() == 0)) readonlyCount++;
+            }
+            if (readonlyCount > 2 && deviceSearch.getText().toString().trim().isEmpty()) {
+                Button details = button(expandedDevices.contains(key) ? "收起状态" : "更多状态（" + (readonlyCount - 2) + "）", false, () -> {
+                    if (!expandedDevices.remove(key)) expandedDevices.add(key);
+                    refreshDevices();
+                });
+                LinearLayout.LayoutParams params = matchWrap(); params.topMargin = dp(12);
+                box.addView(details, params);
+            }
+        }
+        return box;
+    }
+
+    private void addCoverButtons(LinearLayout box, JSONObject device, JSONObject entity,
+            String revision, boolean available) {
+        String deviceName = nonempty(device.optString("name"), "窗帘");
+        String entityName = nonempty(entity.optString("name"), deviceName);
+        if (!entityName.equals(deviceName)) {
+            TextView label = text(entityName, 14, INK, false);
+            label.setPadding(0, dp(12), 0, 0);
+            box.addView(label, matchWrap());
+        }
+        // Absolute open/close commands do not depend on a reported opening position.
+        // Capability, availability and the existing confirmation policy still apply.
+        LinearLayout controls = row();
+        controls.setPadding(0, dp(14), 0, 0);
+        boolean ready = available && entityAvailable(entity);
+        String target = targetLabel(device, entity);
+        String[] keys = {"open", "close"};
+        String[] labels = {"打开", "关闭"};
+        for (int index = 0; index < keys.length; index++) {
+            JSONObject action = catalogAction(entity, keys[index]);
+            Button control = button(labels[index], index == 0,
+                    () -> chooseDirectAction(device, entity, revision, action));
+            enabled(control, ready && action != null);
+            control.setContentDescription(target + "，" + labels[index] + "，确认后执行");
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1);
+            if (index > 0) params.leftMargin = dp(10);
+            controls.addView(control, params);
+        }
+        JSONArray actions = entity.optJSONArray("actions");
+        if (actions != null && actions.length() > 0) {
+            Button more = button("操作…", false, () -> chooseAction(device, entity, revision));
+            enabled(more, ready);
+            more.setContentDescription(target + "，其他操作，确认后执行");
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(dp(94), LayoutParams.WRAP_CONTENT);
+            params.leftMargin = dp(10);
+            controls.addView(more, params);
+        }
+        box.addView(controls, matchWrap());
+    }
+
+    private static JSONObject catalogAction(JSONObject entity, String key) {
+        JSONArray actions = entity.optJSONArray("actions");
+        if (actions != null) for (int index = 0; index < actions.length(); index++) {
+            JSONObject action = actions.optJSONObject(index);
+            if (action != null && key.equals(action.optString("action", ""))
+                    && "none".equals(action.optString("value_type", ""))) return action;
+        }
+        return null;
+    }
+
+    private void chooseDirectAction(JSONObject device, JSONObject entity, String revision, JSONObject action) {
+        if (action == null || touchBusy || getVisibility() != VISIBLE) return;
+        cancelTouchAction();
+        homeControls.dismissControlDialog();
+        confirmAction(device, entity, revision, action, null, "");
+    }
+
+    private static JSONObject mainPowerEntity(JSONObject device) {
+        JSONArray entities = device.optJSONArray("entities");
+        JSONObject selected = null;
+        if (entities != null) for (int index = 0; index < entities.length(); index++) {
+            JSONObject entity = entities.optJSONObject(index);
+            if (entity == null || !"switch".equals(entity.optString("domain", ""))
+                    || !device.optString("name", "").equals(entity.optString("name", ""))) continue;
+            if (selected != null) return null;
+            selected = entity;
+        }
+        return selected;
+    }
+
+    private void addPlugPowerButtons(LinearLayout box, JSONObject device, JSONObject entity,
+            String revision, boolean ready) {
+        TextView state = text(entity == null ? "状态未知" : displayState(entity), 14, MUTED, false);
+        state.setPadding(0, dp(10), 0, 0);
+        box.addView(state, matchWrap());
+        LinearLayout controls = row();
+        controls.setPadding(0, dp(12), 0, 0);
+        String target = join(device.optString("room", ""), device.optString("name", "烤箱插座"));
+        String[] keys = {"power_on", "power_off"};
+        String[] labels = {"开启", "关闭"};
+        for (int index = 0; index < keys.length; index++) {
+            JSONObject action = entity == null ? null : catalogAction(entity, keys[index]);
+            Button control = button(labels[index], index == 0,
+                    () -> chooseDirectAction(device, entity, revision, action));
+            enabled(control, ready && action != null);
+            control.setContentDescription(target + "，" + labels[index] + "，确认后执行");
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1);
+            if (index > 0) params.leftMargin = dp(10);
+            controls.addView(control, params);
+        }
+        box.addView(controls, matchWrap());
     }
 
     private void chooseAction(JSONObject device, JSONObject entity, String revision) {
@@ -568,6 +711,7 @@ public final class ControlCenter extends FrameLayout {
         actionDialog = dialog;
         dialog.setOnDismissListener(d -> { if (actionDialog == dialog) actionDialog = null; });
         dialog.show();
+        HomeStyle.dialog(dialog);
     }
 
     private void dismissActionDialog() {
@@ -688,21 +832,12 @@ public final class ControlCenter extends FrameLayout {
     @Override protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         int horizontal = Math.max(dp(18), (w - dp(1040)) / 2);
-        content.setPadding(horizontal, dp(28), horizontal, dp(36));
-        boolean nextWide = w >= dp(800);
-        if (nextWide == wide) return;
-        wide = nextWide;
-        columns.setOrientation(wide ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams deviceParams = wide
-                ? new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1)
-                : matchWrap();
-        LinearLayout.LayoutParams environmentParams = wide
-                ? new LinearLayout.LayoutParams(0, LayoutParams.WRAP_CONTENT, 1)
-                : matchWrap();
-        environmentParams.leftMargin = wide ? dp(16) : 0;
-        environmentParams.topMargin = wide ? 0 : dp(16);
-        deviceCard.setLayoutParams(deviceParams);
-        environmentCard.setLayoutParams(environmentParams);
+        content.setPadding(horizontal, dp(18), horizontal, dp(32));
+        boolean nextWide = w >= dp(900);
+        if (nextWide != wide) {
+            wide = nextWide;
+            if (allDevicesBody != null) post(this::refreshDevices);
+        }
     }
 
     private LinearLayout column() {

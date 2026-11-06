@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="HomePadTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:colorAccent">#806343</item>
+        <item name="android:colorControlNormal">#88735C</item>
+        <item name="android:colorControlActivated">#806343</item>
+        <item name="android:textColorPrimary">#51402F</item>
+        <item name="android:textColorSecondary">#88735C</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:alertDialogTheme">@style/HomePadDialog</item>
+    </style>
+    <style name="HomePadDialog" parent="android:style/Theme.Material.Light.Dialog.Alert">
+        <item name="android:colorAccent">#806343</item>
+        <item name="android:colorControlNormal">#88735C</item>
+        <item name="android:colorControlActivated">#806343</item>
+        <item name="android:textColorPrimary">#51402F</item>
+        <item name="android:textColorSecondary">#88735C</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

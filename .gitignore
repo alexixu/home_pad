@@ -9,6 +9,18 @@
 !/work/root-prep/
 !/work/unlock-feasibility/
 !/work/voice-service/
+!/work/tmall-bridge/
+/work/tmall-bridge/*
+!/work/tmall-bridge/AndroidCurtainUi.java
+!/work/tmall-bridge/BridgePolicy.java
+!/work/tmall-bridge/BridgePolicyTest.java
+!/work/tmall-bridge/TmallCurtainBridge.java
+!/work/tmall-bridge/build.py
+!/work/tmall-bridge/deploy.py
+!/work/tmall-bridge/ha_setup.py
+!/work/tmall-bridge/test_ha_setup.py
+!/work/tmall-bridge/README.md
+!/work/tmall-bridge/scrcpy-APACHE-2.0.txt
 
 /work/voice-service/*
 !/work/voice-service/server.py

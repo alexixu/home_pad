@@ -245,6 +245,10 @@ public final class HomeDevices {
     public synchronized void refresh(Callback callback){
         if(destroyed||!active){callback(callback,error("not_ready"));return;}
         if(busy){callback(callback,error("busy"));return;}
+        File incomingDirectory=context.getExternalFilesDir(null);
+        if(incomingDirectory!=null&&new File(incomingDirectory,"home-device-catalog.json").isFile()&&!importCatalog()){
+            callback(callback,current.toJson(""));return;
+        }
         if(manifest==null){callback(callback,current.toJson(""));return;}
         final HomeControls.DeviceConnection connection;
         try{connection=HomeControls.captureDeviceConnection(context);if(!manifest.connectionBinding.equals(HomeControls.deviceCatalogBinding(context)))throw new Failure("catalog_connection_changed");}catch(Failure failure){current=emptySnapshot(manifest,failure.code);publish();callback(callback,current.toJson(""));return;}

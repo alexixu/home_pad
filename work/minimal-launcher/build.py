@@ -59,7 +59,10 @@ app_assets = [p for p in app_assets if p.is_file()]
 asset_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in app_assets}
 for source in app_assets:
     relative = source.relative_to(ROOT / 'app/assets')
-    if source.is_symlink() or relative.parts[0] != 'voice' or source.suffix not in ('.html', '.js', '.css'):
+    voice_asset = relative.parts[0] == 'voice' and source.suffix in ('.html', '.js', '.css')
+    dashboard_asset = str(relative) in ('dashboard/courtyard.png', 'dashboard/tabler-license.txt',
+                                      'dashboard/BodoniModa.ttf', 'dashboard/BodoniModa-OFL.txt')
+    if source.is_symlink() or not (voice_asset or dashboard_asset):
         raise SystemExit('Unexpected application asset; review before packaging.')
     destination = PACKAGED_ASSETS / relative
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -76,6 +79,8 @@ def run(*args):
 
 sources = sorted((ROOT / 'app/src').rglob('*.java'))
 source_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}
+resource_files = sorted(p for p in (ROOT / 'app/res').rglob('*') if p.is_file())
+resource_hashes = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in resource_files}
 manifest_hash = hashlib.sha256((ROOT / 'app/AndroidManifest.xml').read_bytes()).hexdigest()
 if not sources:
     raise SystemExit('No application source')
@@ -93,7 +98,7 @@ resource_args = []
 if (ROOT / 'app/res').exists():
     resources = BUILD / 'resources.zip'
     run(BUILD_TOOLS / 'aapt2', 'compile', '--dir', ROOT / 'app/res', '-o', resources)
-    resource_args = ['-R', resources]
+    resource_args = [resources]
 run(BUILD_TOOLS / 'aapt2', 'link', '-o', unsigned, '-I', SDK,
     '--manifest', ROOT / 'app/AndroidManifest.xml', '-A', PACKAGED_ASSETS, '-0', 'onnx', *resource_args)
 with zipfile.ZipFile(unsigned, 'a', zipfile.ZIP_DEFLATED) as archive:
@@ -133,9 +138,10 @@ manifest = subprocess.check_output([str(BUILD_TOOLS / 'aapt2'), 'dump',
 (BUILD / 'apk-metadata.txt').write_text(manifest)
 report = {'apk': str(OUTPUT), 'bytes': OUTPUT.stat().st_size,
           'sha256': hashlib.sha256(OUTPUT.read_bytes()).hexdigest(),
-          'sources': source_hashes, 'assets': asset_hashes, 'manifest_sha256': manifest_hash,
+          'sources': source_hashes, 'assets': asset_hashes, 'resources': resource_hashes, 'manifest_sha256': manifest_hash,
           'source_unchanged': all(hashlib.sha256(p.read_bytes()).hexdigest() == source_hashes[str(p.relative_to(ROOT))] for p in sources)
               and all(hashlib.sha256(p.read_bytes()).hexdigest() == asset_hashes[str(p.relative_to(ROOT))] for p in app_assets)
+              and all(hashlib.sha256(p.read_bytes()).hexdigest() == resource_hashes[str(p.relative_to(ROOT))] for p in resource_files)
               and hashlib.sha256((ROOT / 'app/AndroidManifest.xml').read_bytes()).hexdigest() == manifest_hash,
           'signature_verified': not arguments.check_only, 'installed': False,
           'check_only': arguments.check_only,

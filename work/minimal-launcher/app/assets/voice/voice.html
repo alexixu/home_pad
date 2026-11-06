@@ -16,24 +16,35 @@
     @keyframes wave{0%,100%{transform:scaleY(.55)}50%{transform:scaleY(1.65)}}@keyframes breathe{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.035);opacity:1}}@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
     @media(max-width:700px){.page{gap:16px;padding:22px 24px 28px}main{grid-template-columns:1fr;gap:13px}.voice{padding:8px 0;gap:11px}.orb-wrap{width:182px;height:182px;margin:0 0 5px}.orb{width:146px;height:146px}.orb svg{width:49px;height:49px}.detail{min-height:24px}.conversation{gap:12px}.bubble{padding:17px 20px;min-height:96px;border-radius:21px}.transcript{font-size:16px;max-height:120px}.conversation h2{display:none}.label{margin-bottom:8px}.privacy{margin-top:0}.controls{padding-top:6px;gap:10px}.button{padding:0 22px}.top h1{font-size:19px}}
     @media(max-height:550px) and (min-width:701px){.page{padding:16px 28px;gap:10px}.voice{padding:0;gap:8px}.orb-wrap{width:150px;height:150px;margin:0}.orb{width:122px;height:122px}.orb svg{width:43px;height:43px}.detail{min-height:24px}.bubble{min-height:95px;padding:15px 20px}.transcript{max-height:100px;font-size:16px}.controls{padding:0}.privacy{display:none}}
+    :root{--paper:#f7f0e5;--ink:#51402f;--soft:#88735c;--line:#e8ddcd;--error:#9b5c44}
+    body{background:var(--paper)}.page{min-height:100vh;padding:clamp(22px,3vw,36px);gap:22px}
+    .top-actions{display:flex;align-items:center;gap:12px}.settings{min-height:48px;border:1px solid var(--line);border-radius:24px;padding:0 18px;background:#fffbf3;font-size:14px;white-space:nowrap}
+    .brand-mark{border-color:#d4b88f;color:#806343}.close{width:48px;height:48px;background:#fffbf3}
+    .orb{background:radial-gradient(circle at 32% 24%,#fffefb,#f1ece3 65%,#dfd8cc);color:#6c6b62;box-shadow:inset 0 1px 0 #fff,0 16px 38px #80634312}
+    .halo{border-style:dashed;border-color:#ddcfba}.halo.inner{border-style:solid;border-color:#e8ddcd}
+    .bubble{background:#fffbf3;border-color:var(--line);border-radius:20px}.bubble.assistant{background:#eee4d4;border-color:#e0d1ba}.wave i{background:#806343}
+    .button{background:#fffbf3}.button.primary{background:#806343;border-color:#806343;color:#fff}.button.end{background:#f1e6d7}
+    .controls{flex-wrap:wrap;position:sticky;bottom:0;z-index:2;background:var(--paper);border-top:1px solid var(--line);padding:12px 0 max(8px,env(safe-area-inset-bottom))}.hint{font-size:12px;line-height:1.7}.privacy{font-size:11px}
+    @media(max-width:700px){.top{gap:10px}.brand{gap:9px}.brand-mark{width:32px;height:32px}.brand small{font-size:11px}.top h1{font-size:17px}.top-actions{gap:8px}.settings{font-size:12px;padding:0 12px}.page{padding:22px;gap:18px}.orb-wrap{width:156px;height:156px}.orb{width:126px;height:126px}.bubble{min-height:90px}.detail{font-size:13px}.controls{margin-top:6px}}
+    @media(max-width:380px){.brand-mark{display:none}.page{padding:18px}.settings{padding:0 10px}.top h1{font-size:16px}}
   </style>
 </head>
 <body>
 <div class="page" id="page">
-  <header class="top"><div class="brand"><div class="brand-mark" aria-hidden="true">✦</div><div><small>家的声音</small><h1>ChatGPT 语音</h1></div></div><button class="close" id="close" aria-label="关闭语音，返回首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></header>
+  <header class="top"><div class="brand"><div class="brand-mark" aria-hidden="true">✦</div><div><small>家的声音</small><h1>ChatGPT 语音</h1></div></div><div class="top-actions"><button class="settings" id="settings">语音设置</button><button class="close" id="close" aria-label="关闭语音，返回首页"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></header>
   <main>
     <section class="voice" aria-labelledby="status">
       <div class="orb-wrap" aria-hidden="true"><div class="halo"></div><div class="halo inner"></div><div class="orb"><svg viewBox="0 0 48 48"><rect x="17" y="7" width="14" height="24" rx="7"/><path d="M11 24v2a13 13 0 0 0 26 0v-2M24 39v7M16 46h16"/></svg><div class="wave"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i></div></div></div>
       <p id="status" role="status" aria-live="polite">随时聊聊</p>
-      <p class="detail" id="detail">可以问室内温度、天气，或聊聊今天的安排。</p>
+      <p class="detail" id="detail">说出你的需要，查询或操作家中已接入的设备。</p>
       <div class="connection"><span class="dot"></span><span id="connection">尚未连接</span></div>
       <p class="privacy">进入对话后，语音将发送至 OpenAI 服务。</p>
     </section>
     <section class="conversation" aria-label="当前对话文字">
       <h2>对话</h2>
       <div class="bubble"><p class="label"><span></span>你说</p><p class="transcript placeholder" id="user">开始后，识别到的文字会显示在这里。</p></div>
-      <div class="bubble assistant"><p class="label"><span></span>ChatGPT</p><p class="transcript placeholder" id="assistant">连接后会显示可查询和可控制的家居设备。</p></div>
-      <p class="hint" id="hint">例如：“室内温度多少？”</p>
+      <div class="bubble assistant"><p class="label"><span></span>ChatGPT</p><p class="transcript placeholder" id="assistant">连接后，回答与操作结果会显示在这里。</p></div>
+      <p class="hint" id="hint">设备操作以当前连接和设备支持的功能为准。</p>
       <button id="play" class="button" hidden>播放语音回答</button>
     </section>
   </main>
@@ -63,6 +74,7 @@
     ui.status.textContent = title;
     ui.detail.textContent = detail;
     ui.connection.textContent = connection;
+    ui.start.querySelector("span").textContent = kind === "error" ? "重新连接" : "开始对话";
     native('notifyState', kind, title, run ? run.id : '');
   };
   const controls = (active, closing = false) => {
@@ -81,10 +93,10 @@
   };
   function showModeHint(run) {
     ui.hint.textContent = run.readOnly
-      ? '当前仅查询状态，不会改变设备状态。例如：“室内温度多少？”'
+      ? '当前仅查询状态，不会改变设备状态。设备操作以当前连接和设备支持的功能为准。'
       : run.evidenceInvalid
         ? '本次对话的设备控制已暂停，状态查询仍可继续。重新开始对话后可再发控制指令。'
-        : '可查询家中设备、温湿度与天气，并控制设备目录中支持的功能。请说清房间、设备和目标，例如“把主卧灯亮度调到百分之五十”，无需再次确认。每次对话限一次控制；查询后要控制，请重新开始。离线或只读设备无法控制。';
+        : '请说清房间、设备和操作，无需再次确认。每次对话限一次设备控制；查询后要控制，请重新开始。';
   }
   function timer(run, fn, milliseconds) {
     const handle = setTimeout(() => { run.timers.delete(handle); fn(); }, milliseconds);
@@ -372,7 +384,7 @@
     ui.muteLabel.textContent = '静音'; ui.mute.setAttribute('aria-pressed','false');
     ui.user.textContent = '正在准备麦克风…'; ui.user.classList.add('placeholder');
     ui.assistant.textContent = '连接后就可以开始对话。'; ui.assistant.classList.add('placeholder');
-    ui.hint.textContent = '例如：“室内温度多少？”';
+    ui.hint.textContent = '设备操作以当前连接和设备支持的功能为准。';
     state(run, 'connecting', '正在连接', '正在为你准备语音对话。', '连接 ChatGPT 中');
     try {
       if (!window.HomeVoice || typeof window.HomeVoice.createSession !== 'function') {
@@ -513,6 +525,7 @@
     if (!run || !live(run)) return;
     Promise.resolve(ui.audio.play()).then(() => { if (live(run)) ui.play.hidden = true; }).catch(() => {});
   });
+  $('settings').addEventListener('click',() => { stop(true); native('settingsRequested'); });
   $('close').addEventListener('click',() => { stop(true); native('closeRequested'); });
   document.addEventListener('visibilitychange',() => { if (document.hidden) stop(true); });
   window.addEventListener('pagehide',() => stop(true));
