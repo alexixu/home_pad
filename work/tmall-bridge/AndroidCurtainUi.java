@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
@@ -45,6 +46,62 @@ public final class AndroidCurtainUi implements AutoCloseable {
     public volatile JSONObject commandEvidence=new JSONObject();
     private volatile long actionEventStart;
     private volatile String vendorUiResult="";
+    private String selectedTarget = "";
+    private String verifiedTarget = "";
+    private int verifiedWindow = -1;
+    private long verifiedAt;
+    private boolean receiptCanReleaseNavigation;
+    private volatile String actionTarget = "";
+    private final AtomicReference<String> failedTarget = new AtomicReference<>("");
+    private JSONObject pendingEvidence;
+    private BooleanSupplier keepReading = () -> true;
+
+    public static final class ReadInterruptedException extends Exception {
+        ReadInterruptedException() { super("read_interrupted"); }
+    }
+    private void checkpoint() throws ReadInterruptedException {
+        if (!keepReading.getAsBoolean()) throw new ReadInterruptedException();
+    }
+    private void pause(long milliseconds) throws Exception {
+        long deadline = android.os.SystemClock.uptimeMillis() + milliseconds;
+        while (android.os.SystemClock.uptimeMillis() < deadline) {
+            checkpoint();
+            long remaining = deadline - android.os.SystemClock.uptimeMillis();
+            if (remaining > 0) Thread.sleep(Math.min(50, remaining));
+        }
+        checkpoint();
+    }
+    public void beginCommand(JSONObject command) throws Exception {
+        long started = android.os.SystemClock.uptimeMillis();
+        commandEvidence = new JSONObject().put("target", command.getString("target"))
+                .put("action", command.getString("action")).put("id", command.getString("id"))
+                .put("phase", "dequeued").put("created", command.getDouble("created"))
+                .put("execution_started_uptime", started)
+                .put("ha_to_bridge_ms", command.getLong("_received_wall") - Math.round(command.getDouble("created") * 1000))
+                .put("queue_wait_ms", started - command.getLong("_received_uptime"));
+    }
+    private void phase(String value) throws Exception {
+        commandEvidence.put("phase", value).put("execution_ms",
+                android.os.SystemClock.uptimeMillis() - commandEvidence.optLong("execution_started_uptime", android.os.SystemClock.uptimeMillis()));
+    }
+    public boolean navigationHeld() {
+        if (actionEventStart == 0) return false;
+        boolean ready = BridgePolicy.navigationReady(actionEventStart, android.os.SystemClock.uptimeMillis(),
+                receiptCanReleaseNavigation ? vendorUiResult : "");
+        if (ready) {
+            try {
+                if (pendingEvidence != null) pendingEvidence.put("phase", "failure".equals(vendorUiResult)
+                        ? "vendor_reported_failure" : "acknowledged".equals(vendorUiResult)
+                        ? "vendor_ui_acknowledged" : "clicked_unconfirmed");
+            } catch (Exception ignored) { }
+            actionEventStart = 0;
+        }
+        return !ready;
+    }
+    private void awaitNavigation() throws Exception {
+        while (navigationHeld()) { checkpoint(); pause(50); }
+    }
+    public String takeVendorFailure() { return failedTarget.getAndSet(""); }
 
     public AndroidCurtainUi() throws Exception {
         if (Process.myUid() != 2000) throw new SecurityException("real_shell_uid_required");
@@ -110,6 +167,7 @@ public final class AndroidCurtainUi implements AutoCloseable {
         if (p.waitFor() != 0) throw new IllegalStateException("android_navigation_failed");
     }
     public void ensureSession() throws Exception {
+        checkpoint();
         if (!primaryReady()) throw new IllegalStateException("primary_not_dashboard");
         if (display != null) return;
         command("/system/bin/am", "force-stop", PKG);
@@ -140,14 +198,18 @@ public final class AndroidCurtainUi implements AutoCloseable {
                     ||event.getPackageName()==null||!PKG.contentEquals(event.getPackageName()))return;
             for(CharSequence item:event.getText()){
                 String text=item==null?"":item.toString();
-                for(String label:Arrays.asList("操作失败","控制失败","设备离线","网络异常","设备不在线"))if(text.contains(label))vendorUiResult="failure";
+                for(String label:Arrays.asList("操作失败","控制失败","设备离线","网络异常","设备不在线"))if(text.contains(label)) {
+                    vendorUiResult="failure";
+                    failedTarget.set(actionTarget);
+                }
                 if(vendorUiResult.isEmpty())for(String label:Arrays.asList("操作成功","控制成功","指令已发送"))if(text.contains(label))vendorUiResult="acknowledged";
             }
         });
         command("/system/bin/am", "start", "--display", String.valueOf(displayId), "-f", "0x10000000", "-n", PKG + "/.splash.WelcomeActivity", "-a", "android.intent.action.MAIN", "-c", "android.intent.category.LAUNCHER");
         long until = System.currentTimeMillis() + 12000;
         while (System.currentTimeMillis() < until && !HOME.equals(top())) {
-            if (!primaryReady()) throw new SecurityException("primary_changed"); Thread.sleep(300);
+            checkpoint();
+            if (!primaryReady()) throw new SecurityException("primary_changed"); pause(300);
             if (top().contains("UserLoginActivity") || top().contains("LoginStartActivity")) throw new IllegalStateException("login_required");
         }
         if (!HOME.equals(top())) throw new IllegalStateException("vendor_home_unavailable");
@@ -156,6 +218,7 @@ public final class AndroidCurtainUi implements AutoCloseable {
     private AccessibilityNodeInfo root() throws Exception {
         long until=System.currentTimeMillis()+2000;
         while(true){
+        checkpoint();
         if (!primaryReady() || display == null) throw new SecurityException("display_guard");
         SparseArray<List<AccessibilityWindowInfo>> all = automation.getWindowsOnAllDisplays();
         List<AccessibilityWindowInfo> windows = all.get(displayId);
@@ -169,7 +232,7 @@ public final class AndroidCurtainUi implements AutoCloseable {
         if(foreignLayer!=Integer.MIN_VALUE&&(selected==null||foreignLayer>=layer)){if(selected!=null)selected.recycle();throw new SecurityException("unexpected_vendor_window");}
         if(selected!=null)return selected;
         if(System.currentTimeMillis()>=until)throw new IllegalStateException("vendor_window_loading_timeout");
-        Thread.sleep(100);
+        pause(100);
         }
     }
     private static void resourceNodes(AccessibilityNodeInfo node,String id,List<AccessibilityNodeInfo> out,int depth){
@@ -181,7 +244,7 @@ public final class AndroidCurtainUi implements AutoCloseable {
     private void dismissReadOnlyPrompt()throws Exception{
         if(!primaryReady())throw new SecurityException("primary_changed");
         if(MARKETING.equals(top())){
-            command("/system/bin/input","-d",String.valueOf(displayId),"keyevent","4");Thread.sleep(250);return;
+            command("/system/bin/input","-d",String.valueOf(displayId),"keyevent","4");pause(250);return;
         }
         if(!HOME.equals(top()))return;
         AccessibilityNodeInfo page=root();List<AccessibilityNodeInfo> messages=new ArrayList<>(),negative=new ArrayList<>();
@@ -193,7 +256,7 @@ public final class AndroidCurtainUi implements AutoCloseable {
             if(!text.contains("天猫精灵")||!text.contains("通知")||(!text.contains("允许")&&!text.contains("权限")))throw new SecurityException("notification_prompt_unknown");
             AccessibilityNodeInfo button=negative.get(0);
             if(!button.isClickable()||!button.isEnabled()||!button.performAction(AccessibilityNodeInfo.ACTION_CLICK))throw new IllegalStateException("notification_decline_failed");
-            Thread.sleep(250);
+            pause(250);
         }finally{for(AccessibilityNodeInfo node:messages)node.recycle();for(AccessibilityNodeInfo node:negative)node.recycle();page.recycle();}
     }
     private static void textNodes(AccessibilityNodeInfo node, String text, String resource, List<AccessibilityNodeInfo> out, int depth) {
@@ -212,19 +275,29 @@ public final class AndroidCurtainUi implements AutoCloseable {
         boolean value = !nodes.isEmpty(); for (AccessibilityNodeInfo node : nodes) node.recycle(); return value;
     }
     private void goHome() throws Exception {
+        selectedTarget = "";
+        verifiedTarget = "";
+        verifiedWindow = -1;
         dismissReadOnlyPrompt();
         String activity = top();
         if (PANEL.equals(activity) || LAMP_PANEL.equals(activity)) {
-            AccessibilityNodeInfo current = root();
-            try {
-                boolean expected = PANEL.equals(activity)
-                        ? has(current, "智能窗帘V7", "va_my_nav_bar_title") : lampPanel(current);
-                if (!expected) throw new SecurityException("unexpected_panel");
+            // A preempted status read may have just opened a page whose first paint is incomplete.
+            boolean expected = false;
+            long readyUntil = android.os.SystemClock.uptimeMillis() + 3500;
+            while (android.os.SystemClock.uptimeMillis() < readyUntil) {
+                checkpoint();
+                if (!activity.equals(top())) throw new SecurityException("unexpected_panel_activity");
+                AccessibilityNodeInfo current = root();
+                try { expected = PANEL.equals(activity)
+                        ? has(current, "智能窗帘V7", "va_my_nav_bar_title") : lampPanel(current); }
+                finally { current.recycle(); }
+                if (expected) break;
+                pause(75);
             }
-            finally { current.recycle(); }
+            if (!expected) throw new SecurityException("unexpected_panel");
             command("/system/bin/input", "-d", String.valueOf(displayId), "keyevent", "4");
             long until = System.currentTimeMillis()+3000;
-            while (!HOME.equals(top()) && System.currentTimeMillis()<until) Thread.sleep(150);
+            while (!HOME.equals(top()) && System.currentTimeMillis()<until) { checkpoint(); pause(100); }
         }
         if (!HOME.equals(top())) throw new IllegalStateException("vendor_home_required");
     }
@@ -233,13 +306,18 @@ public final class AndroidCurtainUi implements AutoCloseable {
     }
 
     /** Opens the uniquely named room's device card. The quick-control child is never clicked. */
-    public JSONObject readLampStatus(BooleanSupplier keepReading) throws Exception {
+    public JSONObject readLampStatus(BooleanSupplier continueReading) throws Exception {
+        keepReading = continueReading;
+        try { return readLampCurrent(continueReading); }
+        finally { keepReading = () -> true; }
+    }
+    private JSONObject readLampCurrent(BooleanSupplier continueReading) throws Exception {
         ensureSession();
         goHome();
         boolean opened = false;
         long deadline = System.currentTimeMillis() + 7000;
         while (System.currentTimeMillis() < deadline) {
-            if (!keepReading.getAsBoolean()) throw new IllegalStateException("lamp_read_interrupted");
+            checkpoint();
             dismissReadOnlyPrompt();
             AccessibilityNodeInfo page = root();
             List<AccessibilityNodeInfo> matches = new ArrayList<>();
@@ -256,7 +334,7 @@ public final class AndroidCurtainUi implements AutoCloseable {
                 for (AccessibilityNodeInfo match : matches) match.recycle();
                 page.recycle();
             }
-            Thread.sleep(250);
+            pause(250);
         }
         if (!opened) throw new IllegalStateException("lamp_card_not_found");
 
@@ -264,7 +342,7 @@ public final class AndroidCurtainUi implements AutoCloseable {
             deadline = System.currentTimeMillis() + 6500;
             String previous = "";
             while (System.currentTimeMillis() < deadline) {
-                if (!keepReading.getAsBoolean()) throw new IllegalStateException("lamp_read_interrupted");
+                checkpoint();
                 if (!primaryReady()) throw new SecurityException("primary_changed");
                 String power = "";
                 if (LAMP_PANEL.equals(top())) {
@@ -280,11 +358,12 @@ public final class AndroidCurtainUi implements AutoCloseable {
                     return new JSONObject().put("power", power).put("online", true)
                             .put("observed", System.currentTimeMillis() / 1000.0).put("source", "official_ui");
                 previous = power;
-                Thread.sleep(550);
+                pause(550);
             }
             throw new IllegalStateException("lamp_state_unverified");
         } finally {
-            goHome();
+            // Leave navigation to the pending control when a status read yields.
+            if (continueReading.getAsBoolean()) goHome();
             focusHome();
         }
     }
@@ -366,16 +445,8 @@ public final class AndroidCurtainUi implements AutoCloseable {
     }
     /** Verify the official settings page's device name and room before any actuator click. */
     private void verifyTargetIdentity(String target)throws Exception{
-        // First paint can precede working page navigation. Require stability first;
-        // the settings round-trip then proves an actual response from the page.
-        long stableUntil=System.currentTimeMillis()+2200;
-        while(System.currentTimeMillis()<stableUntil){
-            if(!primaryReady()||!PANEL.equals(top()))throw new SecurityException("identity_loading_guard");
-            AccessibilityNodeInfo loading=root();
-            try{if(!has(loading,"智能窗帘V7","va_my_nav_bar_title")||!has(loading,"窗帘打开位置",null))throw new SecurityException("identity_model_changed");}
-            finally{loading.recycle();}
-            Thread.sleep(150);
-        }
+        // Wait for a usable, stable page instead of sleeping through a fixed loading interval.
+        waitForStablePanel(3500);
         AccessibilityNodeInfo page=root();List<AccessibilityNodeInfo> parents=new ArrayList<>(),images=new ArrayList<>();
         try{
             if(!PANEL.equals(top())||!has(page,"智能窗帘V7","va_my_nav_bar_title"))throw new SecurityException("identity_panel_guard");
@@ -396,23 +467,48 @@ public final class AndroidCurtainUi implements AutoCloseable {
                     break;
                 }
             }finally{page.recycle();}
-            Thread.sleep(150);
+            pause(150);
         }
         if(!verified)throw new IllegalStateException("identity_read_timeout");
-        command("/system/bin/input","-d",String.valueOf(displayId),"keyevent","4");
-        until=System.currentTimeMillis()+3500;long stableSince=0;int window=-1;
-        while(System.currentTimeMillis()<until){
-            if(!primaryReady()||!PANEL.equals(top()))throw new SecurityException("identity_return_guard");
-            page=root();boolean ready=false;
-            try{
-                if(has(page,"智能窗帘V7","va_my_nav_bar_title")&&has(page,"窗帘打开位置",null)){
-                    JSONObject report=observe(page);ready=report.getBoolean("ready");
-                    if(page.getWindowId()!=window){window=page.getWindowId();stableSince=0;}
-                }
-            }finally{page.recycle();}
-            if(ready){if(stableSince==0)stableSince=System.currentTimeMillis();if(System.currentTimeMillis()-stableSince>=700)return;}
-            else stableSince=0;
-            Thread.sleep(150);
+        // Use the app's own Back button so Android does not finish the whole WebView activity.
+        page = root();
+        List<AccessibilityNodeInfo> back = new ArrayList<>();
+        try {
+            resourceNodes(page, "va_my_nav_bar_back", back, 0);
+            if (back.size() == 1 && back.get(0).isClickable() && back.get(0).isEnabled()) {
+                if (!back.get(0).performAction(AccessibilityNodeInfo.ACTION_CLICK))
+                    throw new IllegalStateException("identity_back_failed");
+            } else {
+                command("/system/bin/input", "-d", String.valueOf(displayId), "keyevent", "4");
+            }
+        } finally {
+            page.recycle();
+            for (AccessibilityNodeInfo node : back) node.recycle();
+        }
+        verifiedWindow = waitForStablePanel(3500);
+        verifiedTarget = target;
+        verifiedAt = android.os.SystemClock.uptimeMillis();
+    }
+    private int waitForStablePanel(long timeout) throws Exception {
+        long deadline = android.os.SystemClock.uptimeMillis() + timeout;
+        long stableSince = 0;
+        int window = -1;
+        while (android.os.SystemClock.uptimeMillis() < deadline) {
+            if (!primaryReady() || !PANEL.equals(top())) throw new SecurityException("identity_return_guard");
+            AccessibilityNodeInfo page = root();
+            boolean ready = false;
+            try {
+                ready = !has(page, "设备名称", null) && observe(page).getBoolean("ready");
+                if (page.getWindowId() != window) { window = page.getWindowId(); stableSince = 0; }
+            } catch (IllegalStateException | SecurityException loading) {
+                ready = false;
+            } finally { page.recycle(); }
+            long now = android.os.SystemClock.uptimeMillis();
+            if (ready) {
+                if (stableSince == 0) stableSince = now;
+                if (now - stableSince >= 150) return window;
+            } else stableSince = 0;
+            pause(75);
         }
         throw new IllegalStateException("identity_return_timeout");
     }
@@ -437,69 +533,125 @@ public final class AndroidCurtainUi implements AutoCloseable {
             try{diagnoseControls(child,out,depth+1);}finally{if(child!=null)child.recycle();}}
     }
     public JSONObject read(String target, String action, BooleanSupplier authorize) throws Exception {
-        if(!"curtain".equals(target)&&!"sheer".equals(target))throw new SecurityException("target_refused");
-        if(!action.isEmpty()&&BridgePolicy.controlLabel(action).isEmpty())throw new SecurityException("action_refused");
-        ensureSession();goHome();
-        boolean opened=false;long cardsUntil=System.currentTimeMillis()+9000;
-        while(System.currentTimeMillis()<cardsUntil){
-            dismissReadOnlyPrompt();
-            AccessibilityNodeInfo home=root();List<AccessibilityNodeInfo> matches=new ArrayList<>();
-            try {
-                cards(home,"curtain".equals(target)?"窗帘":"窗纱",matches,0);
-                if(matches.size()>1||!primaryReady()||!HOME.equals(top()))throw new SecurityException("target_ambiguous_or_offline");
-                if(matches.size()==1){
-                    if(!matches.get(0).performAction(AccessibilityNodeInfo.ACTION_CLICK))throw new IllegalStateException("panel_navigation_failed");
-                    opened=true;break;
+        return read(target, action, authorize, () -> true);
+    }
+    public JSONObject read(String target, String action, BooleanSupplier authorize,
+            BooleanSupplier continueReading) throws Exception {
+        keepReading = continueReading;
+        try { return readCurrent(target, action, authorize); }
+        finally { keepReading = () -> true; }
+    }
+    private boolean canReuseCurrentPanel(String target) throws Exception {
+        if (!target.equals(selectedTarget) || !PANEL.equals(top())) return false;
+        AccessibilityNodeInfo page = root();
+        try { return BridgePolicy.canReusePanel(target, verifiedTarget, page.getWindowId(), verifiedWindow,
+                verifiedAt, android.os.SystemClock.uptimeMillis()); }
+        finally { page.recycle(); }
+    }
+    private JSONObject readCurrent(String target, String action, BooleanSupplier authorize) throws Exception {
+        if (!"curtain".equals(target) && !"sheer".equals(target)) throw new SecurityException("target_refused");
+        if (!action.isEmpty() && BridgePolicy.controlLabel(action).isEmpty()) throw new SecurityException("action_refused");
+        checkpoint();
+        ensureSession();
+        boolean reuse = !action.isEmpty() && canReuseCurrentPanel(target);
+        if (!target.equals(selectedTarget) || !PANEL.equals(top()) || !action.isEmpty() && !reuse) {
+            awaitNavigation();
+            goHome();
+            boolean opened = false;
+            long cardsUntil = System.currentTimeMillis() + 9000;
+            while (System.currentTimeMillis() < cardsUntil) {
+                checkpoint();
+                dismissReadOnlyPrompt();
+                AccessibilityNodeInfo home = root();
+                List<AccessibilityNodeInfo> matches = new ArrayList<>();
+                try {
+                    cards(home, "curtain".equals(target) ? "窗帘" : "窗纱", matches, 0);
+                    if (matches.size() > 1 || !primaryReady() || !HOME.equals(top()))
+                        throw new SecurityException("target_ambiguous_or_offline");
+                    if (matches.size() == 1) {
+                        if (!matches.get(0).performAction(AccessibilityNodeInfo.ACTION_CLICK))
+                            throw new IllegalStateException("panel_navigation_failed");
+                        opened = true;
+                        selectedTarget = target;
+                        break;
+                    }
+                } finally {
+                    for (AccessibilityNodeInfo node : matches) node.recycle();
+                    home.recycle();
                 }
-            }finally{for(AccessibilityNodeInfo node:matches)node.recycle();home.recycle();}
-            Thread.sleep(300);
-        }
-        if(!opened)throw new IllegalStateException("target_offline_or_not_loaded");
-        JSONObject observation=null;long until=System.currentTimeMillis()+9000;
-        while(System.currentTimeMillis()<until) {
-            if(!primaryReady())throw new SecurityException("primary_changed");
-            if(PANEL.equals(top())) {
-                AccessibilityNodeInfo page=root();
-                try{observation=observe(page);break;}catch(IllegalStateException|SecurityException pending){}
-                finally{page.recycle();}
+                pause(100);
             }
-            Thread.sleep(250);
+            if (!opened) throw new IllegalStateException("target_offline_or_not_loaded");
         }
-        if(observation==null)throw new IllegalStateException("panel_read_timeout");
-        if(!action.isEmpty()){
-            commandEvidence=new JSONObject().put("target",target).put("action",action).put("phase","verifying_target");
-            verifyTargetIdentity(target);
-            commandEvidence=new JSONObject().put("target",target).put("action",action).put("identity_verified",true).put("phase","target_verified");
+        JSONObject observation = null;
+        long until = System.currentTimeMillis() + 9000;
+        while (System.currentTimeMillis() < until) {
+            checkpoint();
+            if (!primaryReady()) throw new SecurityException("primary_changed");
+            if (PANEL.equals(top())) {
+                AccessibilityNodeInfo page = root();
+                try { observation = observe(page); break; }
+                catch (IllegalStateException | SecurityException loading) { }
+                finally { page.recycle(); }
+            }
+            pause(100);
         }
+        if (observation == null) throw new IllegalStateException("panel_read_timeout");
+        if (action.isEmpty()) return observation;
+
+        phase("panel_ready");
+        long identityStart = android.os.SystemClock.uptimeMillis();
+        reuse = reuse && canReuseCurrentPanel(target);
+        if (!reuse) {
+            awaitNavigation();
+            phase("verifying_target");
+            // Finish this non-actuating round trip before yielding, so a new command inherits a known page.
+            BooleanSupplier previous = keepReading;
+            keepReading = () -> true;
+            try { verifyTargetIdentity(target); }
+            finally { keepReading = previous; }
+        }
+        commandEvidence.put("identity_verified", true).put("panel_reused", reuse)
+                .put("identity_ms", android.os.SystemClock.uptimeMillis() - identityStart);
+        phase("target_verified");
+        checkpoint();
         focusHome();
-        if(!action.isEmpty()) {
-            if(!observation.getBoolean("ready")||!authorize.getAsBoolean()||!primaryReady()||!PANEL.equals(top()))throw new SecurityException("command_expired_or_unavailable");
-            AccessibilityNodeInfo page=root(), control=null;
-            try {
-                JSONObject fresh=observe(page);
-                if(!fresh.getBoolean("ready"))throw new SecurityException("capabilities_changed");
-                control=button(page,BridgePolicy.controlLabel(action));
-                if(control==null||!authorize.getAsBoolean()||!primaryReady())throw new SecurityException("final_command_guard");
-                vendorUiResult="";actionEventStart=android.os.SystemClock.uptimeMillis();uiActionAttempts++;
-                commandEvidence=new JSONObject().put("target",target).put("action",action).put("identity_verified",true).put("input_method","accessibility_click").put("phase","click_attempted");
-                if(!control.performAction(AccessibilityNodeInfo.ACTION_CLICK))throw new IllegalStateException("device_action_not_applied");
-                uiActions++;
-                commandEvidence=new JSONObject().put("target",target).put("action",action).put("identity_verified",true).put("input_method","accessibility_click").put("phase","clicked_unconfirmed");
-            }finally{if(control!=null)control.recycle();page.recycle();}
-            // Let the official app finish its asynchronous work before leaving this page.
-            long settleUntil=System.currentTimeMillis()+6000;
-            while(System.currentTimeMillis()<settleUntil){
-                if(!primaryReady()||!PANEL.equals(top()))throw new SecurityException("post_click_activity_changed");
-                if("failure".equals(vendorUiResult)){
-                    commandEvidence.put("phase","vendor_reported_failure");throw new IllegalStateException("vendor_reported_failure");
-                }
-                Thread.sleep(250);
+        if (!observation.getBoolean("ready") || !authorize.getAsBoolean() || !primaryReady() || !PANEL.equals(top()))
+            throw new SecurityException("command_expired_or_unavailable");
+        AccessibilityNodeInfo page = root(), control = null;
+        try {
+            JSONObject fresh = observe(page);
+            if (!fresh.getBoolean("ready")) throw new SecurityException("capabilities_changed");
+            if (page.getWindowId() != verifiedWindow || !target.equals(selectedTarget))
+                throw new SecurityException("verified_page_changed");
+            control = button(page, BridgePolicy.controlLabel(action));
+            if (control == null || !authorize.getAsBoolean() || !primaryReady())
+                throw new SecurityException("final_command_guard");
+            // An overlapping toast cannot identify which of two rapid inputs it acknowledges.
+            receiptCanReleaseNavigation = !navigationHeld();
+            vendorUiResult = "";
+            actionTarget = target;
+            actionEventStart = android.os.SystemClock.uptimeMillis();
+            uiActionAttempts++;
+            commandEvidence.put("input_method", "accessibility_click");
+            phase("click_attempted");
+            if (!control.performAction(AccessibilityNodeInfo.ACTION_CLICK)) {
+                actionEventStart = 0;
+                throw new IllegalStateException("device_action_not_applied");
             }
-            actionEventStart=0;
-            commandEvidence.put("phase","acknowledged".equals(vendorUiResult)?"vendor_ui_acknowledged":"clicked_unconfirmed");
-            page=root();try{observation=observe(page);}finally{page.recycle();}
+            uiActions++;
+            pendingEvidence = commandEvidence;
+            commandEvidence.put("ha_to_click_ms", System.currentTimeMillis() - Math.round(commandEvidence.optDouble("created", System.currentTimeMillis()/1000.0) * 1000))
+                    .put("click_uptime", android.os.SystemClock.uptimeMillis());
+            phase("clicked_unconfirmed");
+        } finally {
+            if (control != null) control.recycle();
+            page.recycle();
         }
-        goHome();focusHome();return observation;
+        // Keep the official page alive without blocking the worker. Same-target controls reuse it;
+        // background reads and cross-device navigation wait for a receipt or the existing 6 s guard.
+        focusHome();
+        return observation;
     }
     private AccessibilityNodeInfo primaryRoot()throws Exception{
         if(!primaryReady())throw new SecurityException("primary_not_dashboard");
@@ -547,7 +699,7 @@ public final class AndroidCurtainUi implements AutoCloseable {
                 try{if(scrolls.size()!=1||!scrolls.get(0).performAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD))break;}
                 finally{for(AccessibilityNodeInfo node:scrolls)node.recycle();}
             }finally{page.recycle();for(AccessibilityNodeInfo node:on)node.recycle();for(AccessibilityNodeInfo node:off)node.recycle();}
-            Thread.sleep(300);
+            pause(300);
         }
         return new JSONObject().put("open_visible",false).put("close_visible",false).put("actuator_inputs",0);
     }
@@ -566,14 +718,14 @@ public final class AndroidCurtainUi implements AutoCloseable {
                 }finally{for(AccessibilityNodeInfo node:labels)node.recycle();}
             }
         }finally{page.recycle();}
-        Thread.sleep(1400);boolean curtain=false,sheer=false,available=false,refreshed=false;
+        pause(1400);boolean curtain=false,sheer=false,available=false,refreshed=false;
         for(int step=0;step<7;step++){
             page=primaryRoot();
             try{
                 if(!refreshed){
                     List<AccessibilityNodeInfo> refresh=new ArrayList<>();textNodes(page,"刷新",null,refresh,0);
                     try{if(refresh.size()==1){AccessibilityNodeInfo button=firstClickable(refresh.get(0));
-                        try{if(button!=null){refreshed=button.performAction(AccessibilityNodeInfo.ACTION_CLICK);Thread.sleep(800);}}
+                        try{if(button!=null){refreshed=button.performAction(AccessibilityNodeInfo.ACTION_CLICK);pause(800);}}
                         finally{if(button!=null)button.recycle();}}}
                     finally{for(AccessibilityNodeInfo node:refresh)node.recycle();}
                 }
@@ -584,7 +736,7 @@ public final class AndroidCurtainUi implements AutoCloseable {
                 try{if(scrolls.size()!=1||!scrolls.get(0).performAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD))break;}
                 finally{for(AccessibilityNodeInfo node:scrolls)node.recycle();}
             }finally{page.recycle();}
-            Thread.sleep(350);
+            pause(350);
         }
         result.put("curtain_visible",curtain).put("sheer_visible",sheer).put("available_label_visible",available);
         JSONArray directButtons=new JSONArray();page=primaryRoot();
@@ -616,7 +768,7 @@ public final class AndroidCurtainUi implements AutoCloseable {
                 if(!buttons.iterator().next().performAction(AccessibilityNodeInfo.ACTION_CLICK))throw new IllegalStateException("action_menu_unavailable");
             }else throw new IllegalStateException("unique_curtain_menu_required");
         }finally{for(AccessibilityNodeInfo node:names)node.recycle();for(AccessibilityNodeInfo node:buttons)node.recycle();page.recycle();}
-        Thread.sleep(250);page=primaryRoot();
+        pause(250);page=primaryRoot();
         try{
             result.put("open_choice_visible",has(page,"打开",null)).put("close_choice_visible",has(page,"关闭",null)).put("stop_choice_visible",has(page,"停止",null));
             List<AccessibilityNodeInfo> cancel=new ArrayList<>();textNodes(page,"取消",null,cancel,0);
@@ -629,6 +781,8 @@ public final class AndroidCurtainUi implements AutoCloseable {
         result.put("primary_dashboard_kept",primaryReady());return result;
     }
     public void endSession() {
+        keepReading = () -> true;
+        selectedTarget = ""; verifiedTarget = ""; verifiedWindow = -1;
         actionEventStart=0;
         // Stop delayed vendor callbacks BEFORE removing their destination display.
         boolean vendorOnPrimary=false;

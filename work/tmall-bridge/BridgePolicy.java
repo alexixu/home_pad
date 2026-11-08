@@ -4,6 +4,16 @@ import java.time.OffsetDateTime;
 /** Pure validation shared by the actual runtime and offline checks. */
 public final class BridgePolicy {
     private BridgePolicy() {}
+    public static boolean canReusePanel(String target, String verifiedTarget, int window,
+            int verifiedWindow, long verifiedAt, long now) {
+        return ("curtain".equals(target) || "sheer".equals(target))
+                && target.equals(verifiedTarget) && window == verifiedWindow && window >= 0
+                && verifiedAt > 0 && now >= verifiedAt && now - verifiedAt < 30000;
+    }
+    public static boolean navigationReady(long lastInput, long now, String receipt) {
+        return lastInput == 0 || now - lastInput >= 6000
+                || "acknowledged".equals(receipt) || "failure".equals(receipt);
+    }
     public static boolean targetIdentity(String target,int curtainNames,int sheerNames,int bedroomNames,int deviceNameLabels){
         return bedroomNames==1&&deviceNameLabels==1&&
             (("curtain".equals(target)&&curtainNames==2&&sheerNames==0)||

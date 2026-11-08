@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -35,6 +36,10 @@ public final class TmallCurtainBridge {
     private final Set<String> seen = new LinkedHashSet<>();
     private volatile boolean stopped;
     private volatile boolean initialized;
+    private volatile String latestCommandId = "";
+    private long interruptedReads;
+    private final AtomicLong supersededCommands = new AtomicLong();
+    private String workerPhase = "idle";
     private volatile String lastError = "";
     private volatile String lastCommandError = "";
     private String lastLampError = "";
@@ -124,11 +129,21 @@ public final class TmallCurtainBridge {
                     seen.add(id);if(seen.size()>256)seen.remove(seen.iterator().next());
                     try{
                         JSONObject command=request(state);
-                        if(!controlsEnabled||!queue.offer(command)){rejected++;lastError="command_not_queued";lastCommandError=lastError;}
+                        if (!controlsEnabled) {
+                            rejected++;
+                            lastCommandError = "controls_disabled";
+                        } else {
+                            command.put("_received_uptime", android.os.SystemClock.uptimeMillis());
+                            command.put("_received_wall", System.currentTimeMillis());
+                            latestCommandId = command.getString("id");
+                            // Only the latest helper value can pass authorize(). Replace an unissued command.
+                            if (queue.poll() != null) supersededCommands.incrementAndGet();
+                            queue.offer(command);
+                        }
                     }catch(Exception invalid){rejected++;lastError="invalid_or_expired_command";lastCommandError="request_"+reason(invalid);}
                 }
             }catch(Exception failure){lastError="ha_command_poll_unavailable";}
-            try{Thread.sleep(1000);}catch(InterruptedException ignored){}
+            try{Thread.sleep(200);}catch(InterruptedException ignored){}
         }
     }
     private void publish(String target,JSONObject report)throws Exception{
@@ -154,6 +169,9 @@ public final class TmallCurtainBridge {
                 .put("device_actions",ui.uiActions).put("rejected",rejected).put("controls_enabled",controlsEnabled)
                 .put("device_action_attempts",ui.uiActionAttempts).put("last_command_error",lastCommandError)
                 .put("last_command_evidence",ui.commandEvidence)
+                .put("interrupted_reads", interruptedReads).put("superseded_commands", supersededCommands.get())
+                .put("worker_phase", workerPhase)
+                .put("command_poll_interval_ms", 200).put("navigation_held", ui.navigationHeld())
                 .put("lamp_status_enabled",lampStatusEnabled).put("lamp_queries",lampQueries).put("last_lamp_error",lastLampError)
                 .put("command_poll_initialized",initialized).put("last_error",lastError);
             String temporary=new File(directory,"status.json.new").getAbsolutePath();
@@ -185,48 +203,71 @@ public final class TmallCurtainBridge {
         File stopRequest=new File(directory,"stop.request");
         while(!stopped&&!stopRequest.exists()){
             try{
-                JSONObject command=queue.poll(1,TimeUnit.SECONDS);
+                JSONObject command=queue.poll(200,TimeUnit.MILLISECONDS);
+                String failedTarget = ui.takeVendorFailure();
+                if (!failedTarget.isEmpty()) {
+                    lastError = "vendor_reported_failure";
+                    lastCommandError = "command_vendor_reported_failure";
+                    unavailable(failedTarget);
+                }
                 if(command!=null){
                     String target=command.getString("target");
+                    ui.beginCommand(command);
+                    workerPhase = "command_" + target;
+                    status();
                     if(!authorize(command)){rejected++;lastError="command_no_longer_authorized";lastCommandError=lastError;}
                     else try{
-                        JSONObject report=ui.read(target,command.getString("action"),()->authorize(command));queries++;
+                        JSONObject report=ui.read(target,command.getString("action"),()->authorize(command),
+                                ()->command.optString("id").equals(latestCommandId)&&!stopRequest.exists());queries++;
                         publish(target,report);lastError="";lastCommandError="";
+                    }catch(AndroidCurtainUi.ReadInterruptedException superseded){
+                        supersededCommands.incrementAndGet();
+                        lastCommandError="command_superseded_before_input";
                     }catch(Exception failure){rejected++;lastError="command_failed_no_retry";lastCommandError="command_"+reason(failure);unavailable(target);ui.endSession();}
+                    nextRead = Math.max(nextRead, now() + 10);
+                    nextLampRead = Math.max(nextLampRead, now() + 10);
                 }
-                if(now()>=nextRead){
+                if(now()>=nextRead && queue.isEmpty() && !ui.navigationHeld()){
                     nextRead=now()+30;
                     if(!ui.primaryReady()){
                         unavailable("curtain");unavailable("sheer");ui.endSession();lastError="waiting_for_dashboard";
                     }else{
                         for(String target:new String[]{"curtain","sheer"}){
-                            if(stopRequest.exists())break;
-                            try{JSONObject report=ui.read(target,"",()->false);queries++;publish(target,report);lastError="";}
+                            if(stopRequest.exists()||!queue.isEmpty())break;
+                            workerPhase = "sample_" + target;
+                            status();
+                            try{JSONObject report=ui.read(target,"",()->false,()->queue.isEmpty()&&!stopRequest.exists());queries++;publish(target,report);lastError="";}
+                            catch(AndroidCurtainUi.ReadInterruptedException interrupted){interruptedReads++;break;}
                             catch(Exception failure){unavailable(target);lastError="read_"+reason(failure);ui.endSession();}
                             if(!queue.isEmpty())break;
                         }
                     }
                 }
-                if(lampStatusEnabled&&now()>=nextLampRead&&queue.isEmpty()&&!stopRequest.exists()){
+                if(lampStatusEnabled&&now()>=nextLampRead&&queue.isEmpty()&&!stopRequest.exists()&&!ui.navigationHeld()){
                     nextLampRead=now()+60;
                     if(!ui.primaryReady()){
                         unavailable("lamp");
                         lastLampError="waiting_for_dashboard";
                     }else try{
+                        workerPhase = "sample_lamp";
+                        status();
                         JSONObject report=ui.readLampStatus(()->queue.isEmpty()&&!stopRequest.exists());
                         publish("lamp",report);
                         lampQueries++;
                         lastLampError="";
                     }catch(Exception failure){
                         lastLampError=reason(failure);
-                        if(!"lamp_read_interrupted".equals(lastLampError)){
+                        if (failure instanceof AndroidCurtainUi.ReadInterruptedException || "lamp_read_interrupted".equals(lastLampError)) {
+                            interruptedReads++;
+                        } else {
                             unavailable("lamp");
                             ui.endSession();
                         }
                     }
                 }
-                if(ui.primaryReady())try{inspectDashboard();}catch(Exception failure){lastError="dashboard_"+reason(failure);}
+                if(queue.isEmpty()&&!ui.navigationHeld()&&ui.primaryReady())try{inspectDashboard();}catch(Exception failure){lastError="dashboard_"+reason(failure);}
             }catch(Exception failure){lastError="cycle_"+reason(failure);ui.endSession();}
+            workerPhase = "idle";
             status();
         }
         stop();

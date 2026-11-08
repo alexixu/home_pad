@@ -7,6 +7,18 @@ public final class BridgePolicyTest {
     static void check(boolean value) { checks++; if (!value) throw new AssertionError("bridge policy check " + checks); }
     public static void main(String[] ignored) {
         Set<String> users = new HashSet<>(Arrays.asList("authorized-user"));
+        check(BridgePolicy.canReusePanel("sheer", "sheer", 7, 7, 1000, 1100));
+        check(!BridgePolicy.canReusePanel("curtain", "sheer", 7, 7, 1000, 1100));
+        check(!BridgePolicy.canReusePanel("sheer", "sheer", 8, 7, 1000, 1100));
+        check(!BridgePolicy.canReusePanel("sheer", "sheer", 7, 7, 1000, 31000));
+        check(!BridgePolicy.canReusePanel("sheer", "sheer", 7, 7, 1000, 999));
+        check(!BridgePolicy.canReusePanel("sheer", "sheer", -1, -1, 1000, 1100));
+        check(BridgePolicy.navigationReady(0, 1000, ""));
+        check(!BridgePolicy.navigationReady(1000, 6999, ""));
+        check(BridgePolicy.navigationReady(1000, 7000, ""));
+        check(BridgePolicy.navigationReady(1000, 1100, "acknowledged"));
+        check(BridgePolicy.navigationReady(1000, 1100, "failure"));
+        check(!BridgePolicy.navigationReady(1000, 1100, "unrecognized"));
         check(BridgePolicy.targetIdentity("curtain",2,0,1,1));
         check(BridgePolicy.targetIdentity("sheer",0,2,1,1));
         check(!BridgePolicy.targetIdentity("curtain",0,2,1,1));
