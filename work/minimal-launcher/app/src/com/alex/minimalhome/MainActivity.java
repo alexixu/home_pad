@@ -130,7 +130,7 @@ public final class MainActivity extends Activity {
         controlCenter.hide();
         homeDevices.setListener(() -> {
             if (controlCenter != null) controlCenter.refreshDevices();
-            if (dashboard != null) dashboard.setDeviceCatalog(homeDevices.snapshot().toJson(""));
+            if (dashboard != null) dashboard.setDeviceCatalog(homeDevices.snapshot().controlCenterCatalog());
         });
         homeControls.setStateListener(controlState -> {
             dashboard.setState(controlState);
