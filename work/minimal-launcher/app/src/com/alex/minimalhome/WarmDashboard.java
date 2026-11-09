@@ -40,8 +40,8 @@ public final class WarmDashboard extends FrameLayout {
     private static final int INK = 0xFF654627, TEXT = 0xFF493724, MUTED = 0xFF92724D;
     private static final int GOLD = 0xFFC59750, OLIVE = 0xFF6B793D;
     private final Artwork artwork;
-    private final View clockLabel, temperatureLabel, weatherLabel;
-    private final View[] deviceLabels = new View[6];
+    private final View clockLabel, humidityLabel, weatherLabel;
+    private final View[] deviceLabels = new View[DashboardDevices.MAX_ITEMS];
     private final View searchButton, voiceButton, controlCenterButton;
     private HomeControls.DashboardState state;
     private EnvironmentControls.State environmentState;
@@ -50,7 +50,7 @@ public final class WarmDashboard extends FrameLayout {
     private String wakeStatus = "点击开始语音";
     private float scale = 1, offsetX, offsetY, designWidth = 1600, designHeight = 1000;
     private final RectF environment = new RectF(), indoor = new RectF(), weather = new RectF(), clock = new RectF();
-    private final RectF[] deviceRects = new RectF[6];
+    private final RectF[] deviceRects = new RectF[DashboardDevices.MAX_ITEMS];
     private final RectF searchEntry = new RectF(), voiceEntry = new RectF(), controlEntry = new RectF();
     private boolean portrait, running;
     private final Runnable tick = new Runnable() {
@@ -69,7 +69,7 @@ public final class WarmDashboard extends FrameLayout {
         artwork.setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
         addView(artwork, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         clockLabel = label("时间");
-        temperatureLabel = label("室内温湿度，等待传感器数据");
+        humidityLabel = label("室内湿度，等待传感器数据");
         weatherLabel = label("室外天气，等待天气数据");
         for (int i = 0; i < deviceLabels.length; i++) {
             deviceLabels[i] = label("设备，等待读取"); deviceRects[i] = new RectF();
@@ -123,11 +123,16 @@ public final class WarmDashboard extends FrameLayout {
     }
     private void updateDevices() {
         devices = DashboardDevices.summarize(catalog, state);
-        for (int i = 0; i < deviceLabels.length; i++) deviceLabels[i].setContentDescription(devices.get(i).description());
+        for (int i = 0; i < deviceLabels.length; i++) {
+            boolean visible = i < devices.size();
+            deviceLabels[i].setContentDescription(visible ? devices.get(i).description() : null);
+            deviceLabels[i].setVisibility(visible ? VISIBLE : GONE);
+        }
+        requestLayout();
     }
     public void setEnvironmentState(EnvironmentControls.State next) {
         environmentState = next;
-        temperatureLabel.setContentDescription(describeEnvironment(false));
+        humidityLabel.setContentDescription(describeEnvironment(false, false));
         weatherLabel.setContentDescription(describeEnvironment(true)); artwork.invalidate();
     }
     public void setWakeStatus(String status) {
@@ -135,11 +140,18 @@ public final class WarmDashboard extends FrameLayout {
         voiceButton.setContentDescription("语音助手，点击进入语音模式。" + wakeStatus); artwork.invalidate();
     }
     public String describeEnvironment(boolean outdoor) {
+        return describeEnvironment(outdoor, true);
+    }
+
+    private String describeEnvironment(boolean outdoor, boolean includeIndoorTemperature) {
         EnvironmentControls.State data = environmentState;
-        if (data == null) return outdoor ? "室外天气，等待天气数据" : "室内温湿度，等待传感器数据";
+        if (data == null) return outdoor ? "室外天气，等待天气数据"
+                : includeIndoorTemperature ? "室内温湿度，等待传感器数据" : "室内湿度，等待传感器数据";
         String reading = outdoor ? "室外天气，" + temperatureText(data.outdoorTemperatureC) + "，" + conditionLabel(data.condition)
-                : "室内温度，" + temperatureText(data.temperatureC) + "，湿度 " + humidityText(data.humidity);
-        String source = outdoor ? safe(data.weatherSource) : indoorSource(data);
+                : (includeIndoorTemperature ? "室内温度，" + temperatureText(data.temperatureC) + "，" : "")
+                + "室内湿度，" + humidityText(data.humidity);
+        String source = outdoor ? safe(data.weatherSource)
+                : includeIndoorTemperature ? indoorSource(data) : safe(data.humiditySource);
         String status = passiveStatus(outdoor ? data.weatherStatus : data.indoorStatus);
         String reported = safe(outdoor ? data.weatherReportedAt : data.sensorReportedAt);
         return reading + (source.isEmpty() ? "" : "，来源：" + source)
@@ -239,24 +251,27 @@ public final class WarmDashboard extends FrameLayout {
         offsetX = (w - designWidth * scale) / 2; offsetY = (h - designHeight * scale) / 2;
         if (portrait) {
             clock.set(48, 24, 752, 264); environment.set(40, 290, 760, 526);
-            indoor.set(58, 344, 506, 508); weather.set(506, 344, 742, 508);
+            indoor.set(58, 344, 393, 508); weather.set(393, 344, 742, 508);
             searchEntry.set(48, 1126, 258, 1198); voiceEntry.set(344, 1094, 456, 1206);
             controlEntry.set(542, 1126, 752, 1198);
         } else {
             clock.set(72, 20, 780, 220); environment.set(60, 244, 1060, 454);
-            indoor.set(90, 300, 680, 440); weather.set(680, 300, 1040, 440);
+            indoor.set(90, 300, 553, 440); weather.set(553, 300, 1040, 440);
             searchEntry.set(145, 834, 375, 900); voiceEntry.set(498, 796, 606, 904);
             controlEntry.set(716, 834, 972, 900);
         }
         float left = portrait ? 48 : 72, width = portrait ? 704 : 976;
         float gap = portrait ? 28 : 44, cell = (width - gap) / 2;
-        float top = portrait ? 618 : 530, height = portrait ? 126 : 82, rowGap = portrait ? 20 : 0;
+        int rows = Math.max(1, (devices.size() + 1) / 2);
+        float top = portrait ? 618 : 530, bottom = portrait ? 1074 : 776;
+        float rowGap = portrait ? rows > 3 ? 12 : 20 : 0;
+        float height = Math.min(portrait ? 126 : 82, (bottom - top - rowGap * (rows - 1)) / rows);
         for (int i = 0; i < deviceRects.length; i++) {
             int row = i / 2, col = i % 2;
             float x = left + col * (cell + gap), y = top + row * (height + rowGap);
             deviceRects[i].set(x, y, x + cell, y + height); position(deviceLabels[i], deviceRects[i]);
         }
-        position(clockLabel, clock); position(temperatureLabel, indoor); position(weatherLabel, weather);
+        position(clockLabel, clock); position(humidityLabel, indoor); position(weatherLabel, weather);
         positionAction(searchButton, searchEntry); positionAction(voiceButton, voiceEntry); positionAction(controlCenterButton, controlEntry);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
@@ -375,24 +390,23 @@ public final class WarmDashboard extends FrameLayout {
             fill(0xA3F0E1CA); c.drawRoundRect(environment, 22, 22, p);
             float left = environment.left + 30, top = environment.top;
             text(c, "环境总览", left, top + 38, 27, TEXT, serif);
-            float col = (environment.width() - 60) / 3;
+            float col = (environment.width() - 60) / 2;
             float nameY = top + (portrait ? 85 : 84), valueY = top + (portrait ? 149 : 141);
-            String[] names = {"室内温度", "室内湿度", "室外天气"};
-            String[] symbols = {"thermometer", "droplet", weatherIcon()};
-            Double temperature = environmentState == null ? null : environmentState.temperatureC;
+            String[] names = {"室内湿度", "室外天气"};
+            String[] symbols = {"droplet", weatherIcon()};
             Double humidity = environmentState == null ? null : environmentState.humidity;
             Double outdoor = environmentState == null ? null : environmentState.outdoorTemperatureC;
-            String[] values = {number(temperature) + (valid(temperature) ? "°C" : ""), humidityText(humidity), number(outdoor) + (valid(outdoor) ? "°C" : "")};
-            for (int i = 0; i < 3; i++) {
+            String[] values = {humidityText(humidity), number(outdoor) + (valid(outdoor) ? "°C" : "")};
+            for (int i = 0; i < names.length; i++) {
                 float x = left + i * col, tx = x + (portrait ? 10 : 93);
                 icon(c, symbols[i], x + (portrait ? col - 36 : 45), nameY + (portrait ? -16 : 18), portrait ? 30 : 52);
                 if (portrait) tx = x + 9;
                 text(c, names[i], x + (portrait ? 5 : 93), nameY - (portrait ? 8 : 0), portrait ? 20 : 22, TEXT, body);
                 float valueX = portrait ? x + 5 : tx;
-                float valueSize = portrait ? 40 : i == 2 ? 42 : 49;
+                float valueSize = portrait ? 40 : 49;
                 if (portrait) valueY = top + 150;
                 text(c, values[i], valueX, valueY, valueSize, INK, numerals);
-                if (i == 2) {
+                if (i == 1) {
                     String condition = environmentState == null ? "等待天气" : conditionLabel(environmentState.condition);
                     if (portrait) text(c, fitted(condition, col - 20, 17), valueX, valueY + 28, 17, TEXT, body);
                     else {
@@ -404,40 +418,50 @@ public final class WarmDashboard extends FrameLayout {
             }
             float foot = environment.bottom - 18;
             stroke(0x40B99365, 1); c.drawLine(left, foot - 27, environment.right - 30, foot - 27, p);
-            String source = environmentState == null ? "等待温湿度数据" : indoorSource(environmentState);
+            String source = environmentState == null ? "等待湿度数据" : safe(environmentState.humiditySource);
             String indoorStatus = environmentState == null ? "" : passiveStatus(environmentState.indoorStatus);
             if (!indoorStatus.isEmpty() && !indoorStatus.equals("已连接")) source += " · " + indoorStatus;
             String weatherSource = environmentState == null ? "等待天气数据" : safe(environmentState.weatherSource);
             String attribution = environmentState == null ? "" : weatherCredit(environmentState.weatherAttribution);
             if (!attribution.isEmpty()) weatherSource += " · " + attribution;
-            text(c, fitted(source, portrait ? 320 : 540, 14), left, foot, 14, MUTED, body);
-            float wx = portrait ? left + 340 : left + 610;
+            text(c, fitted(source, col - 24, 14), left, foot, 14, MUTED, body);
+            float wx = left + col;
             text(c, fitted(weatherSource, environment.right - wx - 24, 14), wx, foot, 14, MUTED, body);
         }
         private void drawDevices(Canvas c) {
             float left = portrait ? 48 : 72, top = portrait ? 584 : 506;
             text(c, "常用设备", left, top, 27, TEXT, serif);
             text(c, "设备状态一览", left + 148, top - 1, 18, MUTED, body);
-            for (int i = 0; i < deviceRects.length; i++) {
+            if (devices.isEmpty()) {
+                text(c, catalog == null || !catalog.optBoolean("ok", false)
+                        ? "正在读取设备状态…" : "暂无在线常用设备",
+                        left, top + 58, 18, MUTED, body);
+            }
+            for (int i = 0; i < devices.size(); i++) {
                 RectF r = deviceRects[i]; DashboardDevices.Item item = devices.get(i);
-                float y = r.top + (portrait ? 43 : 30), tx = r.left + (portrait ? 58 : 96);
-                icon(c, item.icon, r.left + (portrait ? 23 : 42), r.top + (portrait ? 52 : 34), portrait ? 38 : 51);
+                float y = r.top + Math.min(portrait ? 43 : 30, r.height() * (portrait ? .28f : .4f));
+                float tx = r.left + (portrait ? 58 : 96);
+                icon(c, item.icon, r.left + (portrait ? 23 : 42), r.top + r.height() * .42f,
+                        Math.min(portrait ? 38 : 51, r.height() - 12));
                 String status = item.status;
                 float statusSize = portrait ? 17 : 20, statusWidth = textWidth(status, statusSize, body);
                 if (portrait) {
                     text(c, fitted(item.name, r.width() - 64, 22), tx, y, 22, TEXT, body);
-                    text(c, item.room, tx, y + 28, 17, MUTED, body);
-                    fill(item.active ? OLIVE : 0xFFAC9D87); c.drawCircle(tx + 4, y + 54, 3.5f, p);
-                    text(c, status, tx + 18, y + 60, statusSize, item.active ? OLIVE : MUTED, body);
+                    text(c, fitted(item.subtitle, r.width() - 64, 17), tx,
+                            y + Math.min(28, r.height() * .26f), 17, MUTED, body);
+                    float statusY = y + Math.min(60, r.height() * .62f);
+                    fill(item.active ? OLIVE : 0xFFAC9D87); c.drawCircle(tx + 4, statusY - 6, 3.5f, p);
+                    text(c, status, tx + 18, statusY, statusSize, item.active ? OLIVE : MUTED, body);
                 } else {
                     float sx = r.right - statusWidth - 13;
                     text(c, fitted(item.name, sx - tx - 28, 23), tx, y, 23, TEXT, body);
-                    text(c, item.room, tx, y + 28, 17, MUTED, body);
+                    text(c, fitted(item.subtitle, r.width() - 100, 17), tx,
+                            y + Math.min(28, r.height() * .4f), 17, MUTED, body);
                     fill(item.active ? OLIVE : 0xFFAC9D87); c.drawCircle(sx - 16, y + 2, 5, p);
                     text(c, status, sx, y + 8, statusSize, item.active ? OLIVE : MUTED, body);
                 }
                 stroke(0x40B99365, 1); c.drawLine(r.left, r.bottom - 2, r.right, r.bottom - 2, p);
-                if (i % 2 == 0 && !portrait) { stroke(0x50B99365, 1); c.drawLine(r.right + 22, r.top + 4, r.right + 22, r.bottom - 13, p); }
+                if (i % 2 == 0 && i + 1 < devices.size() && !portrait) { stroke(0x50B99365, 1); c.drawLine(r.right + 22, r.top + 4, r.right + 22, r.bottom - 13, p); }
             }
         }
         private void drawVoiceEntry(Canvas c) {

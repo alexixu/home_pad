@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -64,6 +65,22 @@ public final class HomeDevicePolicy {
         if (state == null) return false;
         String value = state.optString("state", "");
         return !value.isEmpty() && !value.equals("unknown") && !value.equals("unavailable");
+    }
+    static boolean targetObserved(Entity entity, String action, Object value, JSONObject state) {
+        if (!available(state) || entity.model.contains("天猫精灵桥接")) return false;
+        String observed = state.optString("state");
+        if (action.equals("power_off")) return observed.equals("off");
+        if (action.equals("power_on")) {
+            return entity.domain.equals("climate")
+                    ? Arrays.asList("cool", "heat", "heat_cool", "auto", "dry", "fan_only").contains(observed)
+                    : observed.equals("on");
+        }
+        if (action.equals("open")) return observed.equals("open");
+        if (action.equals("close")) return observed.equals("closed");
+        if (action.equals("set_hvac_mode")) return observed.equals(value);
+        JSONObject attrs = state.optJSONObject("attributes");
+        return action.equals("set_temperature") && value instanceof Number && attrs != null
+                && Math.abs(number(attrs, "temperature") - ((Number) value).doubleValue()) < 1e-6;
     }
     static final class Entity {
         final String entityId, ref, name, domain, deviceId, deviceName, room, model, category;

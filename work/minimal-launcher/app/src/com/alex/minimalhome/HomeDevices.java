@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Tablet-local registry projection and capability-gated controller. Never owns an HA token. */
 public final class HomeDevices {
+    private static final long REFRESH_MS = 15_000L;
     public interface Callback { void done(JSONObject result); }
     public static final class Failure extends Exception {
         public final String code;
@@ -94,6 +95,13 @@ public final class HomeDevices {
             revision=HomeDevicePolicy.hash(value.toString());
         }
         public JSONObject toJson(String query) {
+            return project(query, false);
+        }
+        /** Local UI can drill into all visible entities without the voice payload limit. */
+        JSONObject controlCenterCatalog() {
+            return project("", true);
+        }
+        private JSONObject project(String query, boolean localUi) {
             if(query==null||query.length()>64)return error("invalid_query");
             JSONObject out=HomeDevicePolicy.object();HomeDevicePolicy.put(out,"ok",error.isEmpty());
             if(!error.isEmpty())HomeDevicePolicy.put(out,"error",error);
@@ -107,27 +115,55 @@ public final class HomeDevices {
                 if(matches)matched.add(device);
             }
             HomeDevicePolicy.put(out,"matched_devices",matched.size());HomeDevicePolicy.put(out,"truncated",false);
-            boolean truncated=matched.size()>64;int perDevice=Math.min(64,Math.max(1,256/Math.max(1,Math.min(64,matched.size()))));
+            int deviceLimit = localUi ? matched.size() : 64;
+            boolean truncated = matched.size() > deviceLimit;
+            int perDevice = localUi ? 512 : Math.min(64,Math.max(1,256/Math.max(1,Math.min(64,matched.size()))));
             List<List<Entry>> selected=new ArrayList<>();List<JSONArray> rows=new ArrayList<>();
             for(Device device:matched) {
-                if(devices.length()>=64)break;
+                if(devices.length()>=deviceLimit)break;
                 JSONObject projected=HomeDevicePolicy.object();HomeDevicePolicy.put(projected,"id",device.id);
                 HomeDevicePolicy.put(projected,"name",device.name);HomeDevicePolicy.put(projected,"room",device.room);HomeDevicePolicy.put(projected,"model",device.model);
                 boolean available=false;JSONArray entities=new JSONArray();HomeDevicePolicy.put(projected,"entities",entities);rows.add(entities);
                 List<Entry> candidates=new ArrayList<>();
                 for(HomeDevicePolicy.Entity entity:device.entities) {
+                    if (localUi && (entity.hidden || entity.disabled)) continue;
                     Entry entry=entries.get(entity.ref);if(entry==null)continue;
-                    if(HomeDevicePolicy.available(entry.state))available=true;
+                    if(HomeDevicePolicy.available(entry.state) && (!localUi || entity.category.equals("normal"))) available=true;
                     // A more specific query can reach entities omitted by a broad catalog request.
-                    if(!match.isEmpty()&&!HomeDevicePolicy.normalize(device.name+device.room+device.model).contains(match)
+                    if(!localUi&&!match.isEmpty()&&!HomeDevicePolicy.normalize(device.name+device.room+device.model).contains(match)
                             &&!HomeDevicePolicy.normalize(entity.name).contains(match))continue;
                     candidates.add(entry);
+                }
+                if (localUi) {
+                    for (Entry entry : candidates) {
+                        JSONObject value = entry.json();
+                        HomeDevicePolicy.put(value, "category", entry.entity.category);
+                        if (entry.entity.domain.equals("climate") && entry.entity.category.equals("normal")
+                                && HomeDevicePolicy.available(entry.state)) {
+                            JSONObject attrs = entry.state.optJSONObject("attributes");
+                            if (attrs != null) {
+                                for (String key : new String[]{"current_temperature", "temperature"}) {
+                                    Object reading = attrs.opt(key);
+                                    if (reading instanceof Number && Double.isFinite(((Number) reading).doubleValue())
+                                            && Math.abs(((Number) reading).doubleValue()) <= 1e12) {
+                                        HomeDevicePolicy.put(value, key.equals("temperature") ? "target_temperature" : key, reading);
+                                    }
+                                }
+                                HomeDevicePolicy.put(value, "temperature_unit", manifest.temperatureUnit);
+                            }
+                        }
+                        entities.put(value);
+                    }
+                    HomeDevicePolicy.put(projected,"available",available);
+                    devices.put(projected);
+                    continue;
                 }
                 Collections.sort(candidates,(left,right)->Integer.compare(priority(left),priority(right)));
                 if(candidates.size()>perDevice)truncated=true;
                 selected.add(candidates);
                 HomeDevicePolicy.put(projected,"available",available);devices.put(projected);
             }
+            if (localUi) return out;
             // Fair round-robin allocation retains every physical-device row before adding entities.
             int bytes=out.toString().getBytes(StandardCharsets.UTF_8).length;
             for(int round=0;round<perDevice;round++)for(int index=0;index<selected.size();index++) {
@@ -155,6 +191,7 @@ public final class HomeDevices {
     }
     private final Context context;
     private final Handler main=new Handler(Looper.getMainLooper());
+    private final Runnable periodicRefresh=this::poll;
     private final ExecutorService worker=Executors.newSingleThreadExecutor();
     private final SharedPreferences preferences;
     private final SharedPreferences.OnSharedPreferenceChangeListener connectionListener=(p,k)->connectionChanged();
@@ -173,8 +210,20 @@ public final class HomeDevices {
     }
     public synchronized void setListener(Runnable listener){this.listener=listener;}
     public synchronized Snapshot snapshot(){return current;}
-    public synchronized void start(){if(destroyed||active)return;active=true;preferences.registerOnSharedPreferenceChangeListener(connectionListener);refresh(null);}
-    public synchronized void stop(){active=false;preferences.unregisterOnSharedPreferenceChangeListener(connectionListener);cancel();}
+    public synchronized void start(){
+        if(destroyed||active)return;
+        active=true;
+        preferences.registerOnSharedPreferenceChangeListener(connectionListener);
+        refresh(null);
+        main.postDelayed(periodicRefresh,REFRESH_MS);
+    }
+    private synchronized void poll(){
+        if(destroyed||!active)return;
+        // Read-only refresh is skipped while a request is in flight. Never replay an action.
+        refresh(null);
+        main.postDelayed(periodicRefresh,REFRESH_MS);
+    }
+    public synchronized void stop(){active=false;main.removeCallbacks(periodicRefresh);preferences.unregisterOnSharedPreferenceChangeListener(connectionListener);cancel();}
     public synchronized void destroy(){stop();destroyed=true;listener=null;worker.shutdownNow();}
     public synchronized void cancel(){generation++;if(request!=null)request.cancel();if(future!=null)future.cancel(true);request=null;future=null;busy=false;}
     private synchronized void connectionChanged(){if(destroyed)return;cancel();current=emptySnapshot(manifest,"connection_changed");publish();if(active)refresh(null);}
@@ -326,7 +375,10 @@ public final class HomeDevices {
                 HomeControls.submitDeviceAction(context,ticket.connection,pending,ticket.entry.entity,now,ticket.value,authorization);
                 // One bounded observation. No service retry and no optimistic physical-state claim.
                 try{observation=withUnit(ticket.entry.entity,HomeControls.readDeviceEntity(context,ticket.connection,pending,ticket.entry.entity.entityId),manifest.temperatureUnit);}catch(Failure ignored){ }
-                result=actionResult(ticket,observation==null?"result_unverified":"command_sent",observation);
+                String operation = observation == null ? "result_unverified"
+                        : HomeDevicePolicy.targetObserved(ticket.entry.entity, ticket.action, ticket.value, observation)
+                        ? "target_state_observed" : "command_sent";
+                result=actionResult(ticket,operation,observation);
             }catch(Failure failure){result=pending.submissionStarted?actionResult(ticket,"result_unverified",null):error(failure.code);}
             catch(Exception ignored){result=pending.submissionStarted?actionResult(ticket,"result_unverified",null):error("request_failed");}
             JSONObject done=result,observed=observation;main.post(()->{synchronized(HomeDevices.this){
